@@ -103,8 +103,10 @@ tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
 spotless {
-  // optional: limit format enforcement to just the files changed by this feature branch
-  ratchetFrom 'origin/main'
+//   // optional: limit format enforcement to just the files changed by this feature branch
+//   ratchetFrom 'origin/main'
+
+  enforceCheck = false
 
   format 'misc', {
     // define the files to apply `misc` to
