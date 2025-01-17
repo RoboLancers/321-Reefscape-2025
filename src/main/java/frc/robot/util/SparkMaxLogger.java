@@ -6,6 +6,8 @@ import edu.wpi.first.epilogue.CustomLoggerFor;
 import edu.wpi.first.epilogue.logging.ClassSpecificLogger;
 import edu.wpi.first.epilogue.logging.EpilogueBackend;
 
+// For creating a custom logger, refer to
+// https://docs.wpilib.org/en/stable/docs/software/telemetry/robot-telemetry-with-annotations.html#logging-third-party-data
 @CustomLoggerFor(SparkMax.class)
 public class SparkMaxLogger extends ClassSpecificLogger<SparkMax> {
 
