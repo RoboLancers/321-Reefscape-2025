@@ -8,10 +8,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
 import frc.robot.commands.AutoCommand;
-import frc.robot.commands.DriveCommand;
 import frc.robot.commands.RollerCommand;
-import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
+import frc.robot.subsystems.drivetrain.*;
+import java.io.IOException;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -21,30 +21,42 @@ import frc.robot.subsystems.CANRollerSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems
-  private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
+
+  public Drivetrain initializeDrivetrain() {
+
+    try {
+      return new Drivetrain();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  private final Drivetrain drivetrain = initializeDrivetrain();
 
   // The driver's controller
   private final CommandXboxController driverController =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
 
   // The operator's controller
-  private final CommandXboxController operatorController =
+  private final CommandXboxController manipulatorController =
       new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
 
   // The autonomous chooser
-  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Set up command bindings
     configureBindings();
 
-    // Set the options to show up in the Dashboard for selecting auto modes. If you
-    // add additional auto modes you can add additional lines here with
-    // autoChooser.addOption
-    autoChooser.setDefaultOption("Autonomous", new AutoCommand(driveSubsystem));
+    autoChooser.setDefaultOption("Drive", new AutoCommand(drivetrain));
   }
+
+  // Set the options to show up in the Dashboard for selecting auto modes. If you
+  // add additional auto modes you can add additional lines here with
+  // autoChooser.addOption;
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -60,7 +72,7 @@ public class RobotContainer {
     // value ejecting the gamepiece while the button is held
 
     // before
-    operatorController
+    manipulatorController
         .a()
         .whileTrue(
             new RollerCommand(() -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0, rollerSubsystem));
@@ -71,21 +83,20 @@ public class RobotContainer {
     // stick away from you (a negative value) drives the robot forwards (a positive
     // value). Similarly for the X axis where we need to flip the value so the
     // joystick matches the WPILib convention of counter-clockwise positive
-    driveSubsystem.setDefaultCommand(
-        new DriveCommand(
-            () ->
-                -driverController.getLeftY()
-                    * (driverController.getHID().getRightBumperButton() ? 1 : 0.5),
-            () -> -driverController.getRightX(),
-            driveSubsystem));
+
+    drivetrain.setDefaultCommand(
+        drivetrain.driveFieldRelativeCommand(
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> driverController.getRightX()));
 
     // Set the default command for the roller subsystem to an instance of
     // RollerCommand with the values provided by the triggers on the operator
     // controller
     rollerSubsystem.setDefaultCommand(
         new RollerCommand(
-            () -> operatorController.getRightTriggerAxis(),
-            () -> operatorController.getLeftTriggerAxis(),
+            () -> manipulatorController.getRightTriggerAxis(),
+            () -> manipulatorController.getLeftTriggerAxis(),
             rollerSubsystem));
   }
 
