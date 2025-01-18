@@ -23,17 +23,7 @@ public class RobotContainer {
   // The robot's subsystems
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
 
-  public Drivetrain initializeDrivetrain() {
-
-    try {
-      return new Drivetrain();
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
-  }
-
-  private final Drivetrain drivetrain = initializeDrivetrain();
+  private Drivetrain drivetrain;
 
   // The driver's controller
   private final CommandXboxController driverController =
@@ -49,6 +39,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Set up command bindings
+    try {
+      drivetrain = new Drivetrain();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     configureBindings();
 
     autoChooser.setDefaultOption("Drive", new AutoCommand(drivetrain));

@@ -1,6 +1,8 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.drivetrain;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 // Import relevant classes.
 import edu.wpi.first.math.util.Units;
@@ -23,7 +25,7 @@ public class Drivetrain extends SubsystemBase {
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
     swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
 
-    // swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.fromDegrees(0)));
+    swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.fromDegrees(0)));
   }
 
   /**
