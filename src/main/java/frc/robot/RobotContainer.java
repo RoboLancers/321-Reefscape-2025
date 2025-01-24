@@ -4,18 +4,19 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.drivetrain.Drivetrain;
+import frc.robot.subsystems.drivetrain.Drive;
 
 public class RobotContainer {
 
-  Drivetrain drivetrain;
+  Drive drive;
   CommandXboxController driverController = new CommandXboxController(0);
 
   public RobotContainer() {
-    drivetrain = drivetrain.create();
 
-    drivetrain.setDefaultCommand(
-        drivetrain.driveFieldCentric(
+    drive = Drive.create();
+
+    drive.setDefaultCommand(
+        drive.driveSim(
             driverController.getLeftX(),
             -driverController.getLeftY(),
             driverController.getRightX()));

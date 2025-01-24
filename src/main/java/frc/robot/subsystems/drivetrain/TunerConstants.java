@@ -225,4 +225,26 @@ public class TunerConstants {
               kInvertRightSide,
               kBackRightSteerMotorInverted,
               kBackRightEncoderInverted);
+
+  public static final TunerSwerveDrivetrain kTunerDrivetrain =
+      new TunerSwerveDrivetrain(DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight);
+
+  public static class TunerSwerveDrivetrain {
+    SwerveDrivetrainConstants driveTrainConstants;
+    SwerveModuleConstants<?, ?, ?>[] moduleConstants;
+
+    public TunerSwerveDrivetrain(
+        SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
+      this.driveTrainConstants = driveTrainConstants;
+      this.moduleConstants = modules;
+    }
+
+    public SwerveDrivetrainConstants getDriveTrainConstants() {
+      return driveTrainConstants;
+    }
+
+    public SwerveModuleConstants<?, ?, ?>[] getModuleConstants() {
+      return moduleConstants;
+    }
+  }
 }
