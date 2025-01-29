@@ -9,7 +9,6 @@ import java.util.function.DoubleSupplier;
 public class RollerCommand extends Command {
   private final DoubleSupplier forward;
   private final DoubleSupplier reverse;
-  // private final CANRollerSubsystem rollerSubsystem;
   private final CANRollerSubsystem rollerSubsystem;
 
   public RollerCommand(
@@ -27,7 +26,7 @@ public class RollerCommand extends Command {
   // Runs every cycle while the command is scheduled (~50 times per second)
   @Override
   public void execute() {
-    // Run the roller motor at the desired speed
+    // Run the roller motor at the desired speed (base code)
     rollerSubsystem.runRoller(forward.getAsDouble(), reverse.getAsDouble());
   }
 

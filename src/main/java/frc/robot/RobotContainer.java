@@ -12,7 +12,6 @@ import frc.robot.commands.AutoCommand;
 import frc.robot.commands.RollerCommand;
 import frc.robot.subsystems.CANRollerSubsystem;
 import frc.robot.subsystems.drivetrain.*;
-import java.io.IOException;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -29,11 +28,11 @@ public class RobotContainer {
 
   // The driver's controller
   private final CommandXboxController driverController =
-      new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
+      new CommandXboxController(OperatorConstants.kDriverController);
 
   // The operator's controller
   private final CommandXboxController manipulatorController =
-      new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
+      new CommandXboxController(OperatorConstants.kManipulatorController);
 
   // The autonomous chooser
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -41,12 +40,6 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Set up command bindings
-    try {
-      drivetrain = new Drivetrain();
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
     configureBindings();
 
     autoChooser.setDefaultOption("Drive", new AutoCommand(drivetrain));
@@ -73,7 +66,7 @@ public class RobotContainer {
     manipulatorController
         .a()
         .whileTrue(
-            new RollerCommand(() -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0, rollerSubsystem));
+            new RollerCommand(() -> RollerConstants.kRollerEjectValue, () -> 0, rollerSubsystem));
 
     // Set the default command for the drive subsystem to an instance of the
     // DriveCommand with the values provided by the joystick axes on the driver

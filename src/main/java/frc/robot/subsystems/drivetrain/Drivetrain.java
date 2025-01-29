@@ -1,9 +1,15 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.drivetrain;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 // Import relevant classes.
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -18,14 +24,36 @@ import swervelib.parser.SwerveParser;
 // Example SwerveDrive class
 public class Drivetrain extends SubsystemBase {
   SwerveDrive swerveDrive;
+  SwerveDrivePoseEstimator odometry;
 
-  public Drivetrain() throws IOException {
+  public Drivetrain() {
     double maximumSpeed = Units.feetToMeters(4.5);
 
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
-    swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
+    try {
+      swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.fromDegrees(0)));
+  }
+
+  public SwerveModulePosition[] getSwerveModulePosition() {
+    return swerveDrive.getModulePositions();
+  }
+
+  public Pose2d getPose() {
+    return odometry.getEstimatedPosition();
+  }
+
+  public SwerveModuleState[] getSwerveModuleState() {
+    return swerveDrive.getStates();
+  }
+
+  public void addVisionMeasurement(
+      Pose2d robotPose2d, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
+    odometry.addVisionMeasurement(robotPose2d, timestamp, visionMeasurementStdDevs);
   }
 
   /**

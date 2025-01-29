@@ -3,13 +3,10 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.drivetrain.*;
 
 // Command to run the robot at 1/2 power for 1 second in autonomous
 public class AutoCommand extends Command {
-  CANDriveSubsystem driveSubsystem;
-
   Drivetrain drivetrain;
 
   private final Command autoDriveCommand;
