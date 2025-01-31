@@ -15,17 +15,12 @@ import edu.wpi.first.units.measure.Current;
  */
 public final class Constants {
   public static final class DriveConstants {
-    public static final int kLeftLeaderID = 1;
-    public static final int kLeftFollowerID = 2;
-    public static final int kRightLeaderID = 3;
-    public static final int kRightFollowerID = 4;
-
     public static final Current kDriveCurrentLimit = Amps.of(60);
   }
 
   public static final class RollerConstants {
     public static final int kRollerMotorID = 5;
-    public static final int kRollerCurrentLimit = 60;
+    public static final Current kRollerCurrentLimit = Amps.of(60);
     public static final double kRollerVoltageCompensation = 10;
     public static final double kRollerEjectValue = 0.44;
   }

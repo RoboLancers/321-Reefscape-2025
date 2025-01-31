@@ -1,6 +1,8 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Amps;
+
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -28,7 +30,7 @@ public class CANRollerSubsystem extends SubsystemBase {
     // the motor in the event the roller stalls.
     SparkMaxConfig rollerConfig = new SparkMaxConfig();
     rollerConfig.voltageCompensation(RollerConstants.kRollerVoltageCompensation);
-    rollerConfig.smartCurrentLimit(RollerConstants.kRollerCurrentLimit);
+    rollerConfig.smartCurrentLimit((int) RollerConstants.kRollerCurrentLimit.in(Amps));
     rollerMotor.configure(
         rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
