@@ -1,7 +1,6 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.drivetrain;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,13 +22,4 @@ public class DriveIOIdeal implements DriveIO {
     inputs.pitch = new Rotation2d();
     inputs.roll = new Rotation2d();
   }
-
-  @Override
-  public void resetPose(Pose2d pose) {}
-
-  @Override
-  public void setControl(SwerveRequest request) {}
-
-  @Override
-  public void addVisionMeasurement(Pose2d visionEstimate, double timestamp) {}
 }

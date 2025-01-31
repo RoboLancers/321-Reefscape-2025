@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.ironmaple.simulation.SimulatedArena;
@@ -78,7 +79,6 @@ public class DriveIOSim extends DriveIOKraken {
     inputs.chassisSpeeds = simulatedDrive.getActualSpeedsRobotRelative();
     inputs.pose = simulatedDrive.getOdometryEstimatedPose();
 
-    // there is only yaw
     inputs.yaw =
         new Rotation2d(
             simulatedDrive
@@ -91,6 +91,7 @@ public class DriveIOSim extends DriveIOKraken {
 
     // add simulation periodic to updateInputs, so it loops in drive
     simulatedDrive.periodic();
+    this.updateSimState(0.02, RobotController.getBatteryVoltage());
 
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());

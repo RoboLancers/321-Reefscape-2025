@@ -10,6 +10,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.MathUtils;
+import java.util.function.DoubleSupplier;
 
 @Logged
 
@@ -62,6 +64,7 @@ public class Drive extends SubsystemBase {
               ? (speeds, feedforwards) -> // real drive chassisSpeeds consumer
               io.setControl(
                       new SwerveRequest.ApplyRobotSpeeds()
+                          .withSpeeds(speeds)
                           .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                           .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons()))
               : (speeds, feedforwards) ->
@@ -83,36 +86,47 @@ public class Drive extends SubsystemBase {
   }
 
   // real drive teleop command
-  public Command driveFieldCentric(double translationX, double translationY, double rotation) {
+  public Command driveFieldCentric(
+      DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation) {
 
-    translationX *= TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    translationY *= TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    rotation = MathUtils.squareKeepSign(rotation) * DriveConstants.kMaxAngularVelocity;
+    // apply deadband first, then square rotation, then convert to m/s
+    double newTranslationX =
+        MathUtil.applyDeadband(translationX.getAsDouble(), DriveConstants.kDriveDeadband)
+            * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    double newTranslationY =
+        MathUtil.applyDeadband(translationY.getAsDouble(), DriveConstants.kDriveDeadband)
+            * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    double newRotation =
+        MathUtils.squareKeepSign(
+                MathUtil.applyDeadband(rotation.getAsDouble(), DriveConstants.kRotationDeadband))
+            * DriveConstants.kMaxAngularVelocity;
 
+    // fix swerve drift
     var speeds =
         ChassisSpeeds.discretize(
-            translationX, translationY, rotation, DriveConstants.kLoopDt.magnitude());
+            newTranslationX, newTranslationY, newRotation, DriveConstants.kLoopDt.magnitude());
 
-    return RobotBase.isReal()
-        ? run(
-            () -> {
-              io.setControl(
-                  new SwerveRequest.FieldCentric()
-                      .withDriveRequestType(DriveRequestType.Velocity)
-                      .withDeadband(DriveConstants.kDriveDeadband)
-                      .withRotationalDeadband(DriveConstants.kRotationDeadband)
-                      .withVelocityX(speeds.vxMetersPerSecond)
-                      .withVelocityY(speeds.vyMetersPerSecond)
-                      .withRotationalRate(speeds.omegaRadiansPerSecond));
-            })
-        : run(
-            () -> {
-              io.setSimControl(speeds);
-            });
-  }
+    // x braking
+    // if(Math.abs(newTranslationX) < DriveConstants.kDriveDeadband &&
+    // Math.abs(newTranslationY) < DriveConstants.kDriveDeadband &&
+    // Math.abs(newRotation) < DriveConstants.kRotationDeadband){
 
-  public Command driveSim(double translationX, double translationY, double rotation) {
-    return run(() -> io.setSimControl(new ChassisSpeeds(translationX, translationY, rotation)));
+    // return run (
+    //     () -> {
+    //       io.setControl(new SwerveRequest.SwerveDriveBrake());
+    //     }
+    //   );
+    // }
+
+    return run(
+        () -> {
+          io.setControl(
+              new SwerveRequest.FieldCentric()
+                  .withDriveRequestType(DriveRequestType.Velocity)
+                  .withVelocityX(speeds.vxMetersPerSecond)
+                  .withVelocityY(speeds.vyMetersPerSecond)
+                  .withRotationalRate(speeds.omegaRadiansPerSecond));
+        });
   }
 
   @Override
