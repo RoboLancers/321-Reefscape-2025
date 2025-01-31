@@ -48,6 +48,10 @@ public class Drive extends SubsystemBase {
                 TunerConstants.kTunerDrivetrain.getModuleConstants()));
   }
 
+  public static Drive disable() {
+    return new Drive(new DriveIOIdeal());
+  }
+
   public Drive(DriveIO io) {
     this.io = io;
     inputs = new DriveInputs();
