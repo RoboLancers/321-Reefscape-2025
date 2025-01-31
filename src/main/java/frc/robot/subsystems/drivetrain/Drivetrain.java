@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.function.DoubleSupplier;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 // Example SwerveDrive class
 public class Drivetrain extends SubsystemBase {
@@ -37,6 +39,31 @@ public class Drivetrain extends SubsystemBase {
     }
 
     swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.fromDegrees(0)));
+    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+    configureSwerve();
+  }
+
+  private void configureSwerve() {
+    // swerveDrive.swerveController.setMaximumAngularVelocity(Constants.DrivetrainConstants.kMaxOmegaRadiansPerSecond);
+    swerveDrive.setHeadingCorrection(
+        false); // Heading correction should only be used while controlling the robot via angle.
+    swerveDrive.setCosineCompensator(
+        false); // !SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for
+    // simulations since it causes discrepancies not seen in real life.
+    swerveDrive.setAngularVelocityCompensation(
+        true, false,
+        0.1); // Correct for skew that gets worse as angular velocity increases. Start with a
+    // coefficient of 0.1.
+    swerveDrive.setModuleEncoderAutoSynchronize(
+        false, 1); // Enable if you want to resynchronize your absolute encoders and motor encoders
+    // periodically when they are not moving.
+    // swerveDrive.setChassisDiscretization(true, false,
+    // Constants.DrivetrainConstants.kSecondOrderKinematicsDt);
+    // swerveDrive
+    //     .pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal
+    // encoder
+    // and push the offsets onto it. Throws warning if not possible
+    swerveDrive.setModuleEncoderAutoSynchronize(false, 0);
   }
 
   public SwerveModulePosition[] getSwerveModulePosition() {
