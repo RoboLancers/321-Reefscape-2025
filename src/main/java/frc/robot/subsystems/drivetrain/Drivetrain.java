@@ -1,8 +1,8 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.drivetrain;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -11,7 +11,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 // Import relevant classes.
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,12 +23,12 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 // Example SwerveDrive class
+@Logged
 public class Drivetrain extends SubsystemBase {
   SwerveDrive swerveDrive;
-  SwerveDrivePoseEstimator odometry;
 
   public Drivetrain() {
-    double maximumSpeed = Units.feetToMeters(4.5);
+    double maximumSpeed = 4.5;
 
     File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
     try {
@@ -38,7 +37,7 @@ public class Drivetrain extends SubsystemBase {
       e.printStackTrace();
     }
 
-    swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.fromDegrees(0)));
+    swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.kZero));
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     configureSwerve();
   }
@@ -71,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    return odometry.getEstimatedPosition();
+    return swerveDrive.getPose();
   }
 
   public SwerveModuleState[] getSwerveModuleState() {
@@ -80,7 +79,7 @@ public class Drivetrain extends SubsystemBase {
 
   public void addVisionMeasurement(
       Pose2d robotPose2d, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
-    odometry.addVisionMeasurement(robotPose2d, timestamp, visionMeasurementStdDevs);
+    swerveDrive.addVisionMeasurement(robotPose2d, timestamp, visionMeasurementStdDevs);
   }
 
   /**
@@ -96,11 +95,10 @@ public class Drivetrain extends SubsystemBase {
     return run(
         () -> {
           // Make the robot move FIELD CENTRIC
+          System.out.println(translationX.getAsDouble());
           swerveDrive.drive(
-              new Translation2d(
-                  translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                  translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()),
-              angularRotationX.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(),
+              new Translation2d(translationX.getAsDouble(), translationY.getAsDouble()),
+              angularRotationX.getAsDouble(),
               true,
               false);
         });
@@ -120,12 +118,14 @@ public class Drivetrain extends SubsystemBase {
         () -> {
           // Make the robot move ROBOT-CENTRIC
           swerveDrive.drive(
-              new Translation2d(
-                  translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                  translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()),
-              angularRotationX.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(),
+              new Translation2d(translationX.getAsDouble(), translationY.getAsDouble()),
+              angularRotationX.getAsDouble(),
               false,
               false);
         });
+  }
+
+  public void resetPose(Pose2d pose) {
+    swerveDrive.resetOdometry(pose);
   }
 }

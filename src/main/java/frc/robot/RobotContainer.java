@@ -2,8 +2,11 @@
 package frc.robot;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -38,6 +41,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Set up command bindings
     configureBindings();
+
+    SmartDashboard.putNumber("TranslationSpeed", 3);
+    SmartDashboard.putNumber("RotationSpeed", 4);
 
     autoChooser.setDefaultOption("Drive", new AutoCommand(drivetrain));
   }
@@ -74,10 +80,20 @@ public class RobotContainer {
     // joystick matches the WPILib convention of counter-clockwise positive
 
     drivetrain.setDefaultCommand(
-        drivetrain.driveRobotRelativeCommand(
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
+        drivetrain.driveFieldRelativeCommand(
+            () -> {
+              double a = SmartDashboard.getNumber("TranslationSpeed", 3);
+              return -withDeadband(driverController.getLeftY(), 0.05) * a;
+            },
+            () ->
+                -withDeadband(driverController.getLeftX(), 0.05)
+                    * SmartDashboard.getNumber("TranslationSpeed", 3),
+            () -> {
+              double b = SmartDashboard.getNumber("RotationSpeed", 4);
+              return -withDeadband(driverController.getRightX(), 0.05) * b;
+            }));
+
+    driverController.a().onTrue(Commands.runOnce(() -> drivetrain.resetPose(new Pose2d())));
 
     // Set the default command for the roller subsystem to an instance of
     // RollerCommand with the values provided by the triggers on the operator
@@ -97,5 +113,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
+  }
+
+  public double withDeadband(double val, double deadband) {
+    return Math.abs(val) <= deadband ? 0 : val;
   }
 }
