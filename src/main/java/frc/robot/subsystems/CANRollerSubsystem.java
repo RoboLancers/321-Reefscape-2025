@@ -2,6 +2,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -29,7 +30,8 @@ public class CANRollerSubsystem extends SubsystemBase {
     // voltage dips. The current limit helps prevent breaker trips or burning out
     // the motor in the event the roller stalls.
     SparkMaxConfig rollerConfig = new SparkMaxConfig();
-    rollerConfig.voltageCompensation(RollerConstants.kRollerVoltageCompensation);
+    rollerConfig.voltageCompensation(RollerConstants.kRollerVoltageCompensation.in(Volts));
+
     rollerConfig.smartCurrentLimit((int) RollerConstants.kRollerCurrentLimit.in(Amps));
     rollerMotor.configure(
         rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

@@ -25,7 +25,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 // Example SwerveDrive class
 @Logged
 public class Drivetrain extends SubsystemBase {
-  SwerveDrive swerveDrive;
+  private SwerveDrive swerveDrive;
 
   public Drivetrain() {
     double maximumSpeed = 4.5;
@@ -37,7 +37,7 @@ public class Drivetrain extends SubsystemBase {
       e.printStackTrace();
     }
 
-    swerveDrive.resetOdometry(new Pose2d(1, 1, Rotation2d.kZero));
+    swerveDrive.resetOdometry(new Pose2d(0, 0, Rotation2d.kZero));
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     configureSwerve();
   }
@@ -65,7 +65,7 @@ public class Drivetrain extends SubsystemBase {
     swerveDrive.setModuleEncoderAutoSynchronize(false, 0);
   }
 
-  public SwerveModulePosition[] getSwerveModulePosition() {
+  private SwerveModulePosition[] getSwerveModulePositions() {
     return swerveDrive.getModulePositions();
   }
 
@@ -73,7 +73,7 @@ public class Drivetrain extends SubsystemBase {
     return swerveDrive.getPose();
   }
 
-  public SwerveModuleState[] getSwerveModuleState() {
+  private SwerveModuleState[] getSwerveModuleStates() {
     return swerveDrive.getStates();
   }
 
@@ -95,6 +95,7 @@ public class Drivetrain extends SubsystemBase {
     return run(
         () -> {
           // Make the robot move FIELD CENTRIC
+          // field-Relative is "TRUE"
           System.out.println(translationX.getAsDouble());
           swerveDrive.drive(
               new Translation2d(translationX.getAsDouble(), translationY.getAsDouble()),

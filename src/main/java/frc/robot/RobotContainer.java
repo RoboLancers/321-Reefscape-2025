@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutoCommand;
 import frc.robot.subsystems.drivetrain.*;
 
 /**
@@ -44,8 +43,6 @@ public class RobotContainer {
 
     SmartDashboard.putNumber("TranslationSpeed", 3);
     SmartDashboard.putNumber("RotationSpeed", 4);
-
-    autoChooser.setDefaultOption("Drive", new AutoCommand(drivetrain));
   }
 
   // Set the options to show up in the Dashboard for selecting auto modes. If you
@@ -69,7 +66,7 @@ public class RobotContainer {
     // manipulatorController
     //     .a()
     //     .whileTrue(
-    //         new RollerCommand(() -> RollerConstants.kRollerEjectValue, () -> 0,
+    //         new RollerCommand(() -> RollerConstants.kRollerEject, () -> 0,
     // rollerSubsystem));
 
     // Set the default command for the drive subsystem to an instance of the
