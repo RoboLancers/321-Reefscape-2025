@@ -1,14 +1,16 @@
 /* (C) Robolancers 2025 */
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.algaeIntakePivot.AlgaeIntakePivot;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 
 public class HomingCommands {
+  /**
+   * routine to home all mechanisms on the robot (eg. algae pivot and the elevator) Homes the
+   * elevator first, then moves elevator out of the way and homes the algae pivot
+   */
   public static Command homeEverything(Elevator elevator, AlgaeIntakePivot pivot) {
     return elevator
         .homeEncoder()
@@ -17,8 +19,6 @@ public class HomingCommands {
             pivot
                 .homeMechanism()
                 .onlyIf(() -> !pivot.pivotIsHomed())
-                .deadlineFor(
-                    elevator.goToHeight(
-                        () -> ElevatorConstants.kElevatorDangerHeight.plus(Meters.of(0.1)))));
+                .deadlineFor(elevator.goToHeight(() -> ElevatorConstants.kElevatorDangerHeight)));
   }
 }

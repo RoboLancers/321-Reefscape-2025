@@ -18,15 +18,15 @@ public class AlgaeIntakePivotIOKraken implements AlgaeIntakePivotIO {
   // kraken implementation of real mechanism
   public static final AlgaeIntakePivotConfig config = new AlgaeIntakePivotConfig(0, 0, 0, 0);
 
-  TalonFX pivotMotorLeft =
+  private TalonFX pivotMotorLeft =
       new TalonFX(
           AlgaeIntakePivotConstants.kPivotMotorLeftId); // corresponds to the left pivot motor
-  TalonFX pivotMotorRight =
+  private TalonFX pivotMotorRight =
       new TalonFX(
           AlgaeIntakePivotConstants.kPivotMotorRightId); // corresponds to the right pivot motor
 
-  VoltageOut voltageRequest = new VoltageOut(0); // used to set voltage
-  Follower followRequest =
+  private VoltageOut voltageRequest = new VoltageOut(0); // used to set voltage
+  private Follower followRequest =
       new Follower(
           AlgaeIntakePivotConstants.kPivotMotorLeftId, AlgaeIntakePivotConstants.kRightInverted);
 
@@ -80,7 +80,8 @@ public class AlgaeIntakePivotIOKraken implements AlgaeIntakePivotIO {
     pivotMotorRight.setControl(followRequest);
   }
 
-  public void updateInputs(AlgaeIntakePivotInputs inputs) { // updates inputs
+  public void updateInputs(AlgaeIntakePivotInputs inputs) {
+    // updates inputs
     inputs.pivotAngle = pivotMotorLeft.getPosition().getValue();
     inputs.pivotVelocity = pivotMotorLeft.getVelocity().getValue();
     inputs.pivotCurrent = pivotMotorLeft.getStatorCurrent().getValue();

@@ -16,6 +16,7 @@ import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
 // the same mechanism as algaeIntakeClimb but this controls the rollers instead of the pivot
+// NOTE: + voltage = intake
 @Logged
 public class AlgaeIntakeRollers extends SubsystemBase {
 
@@ -26,15 +27,6 @@ public class AlgaeIntakeRollers extends SubsystemBase {
   private SimpleMotorFeedforward feedForward;
 
   private AlgaeIntakeRollersConfig config;
-
-  public AlgaeIntakeRollers(AlgaeIntakeRollersIO io, AlgaeIntakeRollersConfig config) {
-    this.io = io;
-    this.inputs = new AlgaeIntakeRollersInputs();
-    this.config = config;
-
-    rollerController = new PIDController(config.kP(), config.kI(), config.kD());
-    feedForward = new SimpleMotorFeedforward(0, config.kV());
-  }
 
   public static AlgaeIntakeRollers create() {
     return RobotBase.isReal()
@@ -48,6 +40,15 @@ public class AlgaeIntakeRollers extends SubsystemBase {
   public static AlgaeIntakeRollers disable() {
     return new AlgaeIntakeRollers(
         new AlgaeIntakeRollersIOIdeal(), AlgaeIntakeRollersIOIdeal.config);
+  }
+
+  public AlgaeIntakeRollers(AlgaeIntakeRollersIO io, AlgaeIntakeRollersConfig config) {
+    this.io = io;
+    this.inputs = new AlgaeIntakeRollersInputs();
+    this.config = config;
+
+    rollerController = new PIDController(config.kP(), config.kI(), config.kD());
+    feedForward = new SimpleMotorFeedforward(0, config.kV());
   }
 
   // Tune PID and feed forward constants(kP, kI, kD, kG) live on smart dashboard

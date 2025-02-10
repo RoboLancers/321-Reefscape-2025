@@ -2,6 +2,7 @@
 package frc.robot.subsystems.algaeIntakeRollers;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -10,6 +11,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.RobotConstants;
 
 @Logged
 public class AlgaeIntakeRollersIOSim implements AlgaeIntakeRollersIO {
@@ -34,9 +36,9 @@ public class AlgaeIntakeRollersIOSim implements AlgaeIntakeRollersIO {
   }
 
   public void updateInputs(AlgaeIntakeRollersInputs inputs) {
-    rollerSim.update(0.02);
-    inputs.rollerVelocity =
-        RadiansPerSecond.of(rollerSim.getAngularVelocityRadPerSec()); // gets input info
+    // update information from the DCMotor sim & dashboard inputs
+    rollerSim.update(RobotConstants.kRobotLoopPeriod.in(Seconds));
+    inputs.rollerVelocity = RadiansPerSecond.of(rollerSim.getAngularVelocityRadPerSec());
     inputs.hasAlgae = SmartDashboard.getBoolean("SimInputs/AlgaeIntakeRollers/HasAlgae", false);
   }
 }

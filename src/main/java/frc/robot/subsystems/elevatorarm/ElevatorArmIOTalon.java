@@ -1,8 +1,6 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.elevatorarm;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -84,10 +82,6 @@ public class ElevatorArmIOTalon implements ElevatorArmIO {
 
   // set voltage to the arm motor
   public void setVoltage(Voltage volts) {
-    double voltsWithStall = volts.in(Volts);
-    // TODO: uncomment if arm gearbox exploding becomes an actual issue
-    // if (armMotor.getOutputCurrent() > 40) voltsWithStall /= 60; // jank way to make the motor
-    // essentially stop
-    armMotor.setControl(voltageRequest.withOutput(voltsWithStall));
+    armMotor.setControl(voltageRequest.withOutput(volts));
   }
 }

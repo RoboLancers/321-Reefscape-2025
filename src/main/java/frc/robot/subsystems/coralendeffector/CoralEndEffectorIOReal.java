@@ -10,6 +10,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
@@ -31,7 +32,11 @@ public class CoralEndEffectorIOReal implements CoralEndEffectorIO {
     motor.configure(
         new SparkMaxConfig()
             .inverted(CoralEndEffectorConstants.kInvertedMotor)
-            .smartCurrentLimit(CoralEndEffectorConstants.kCurrentLimit),
+            .smartCurrentLimit(CoralEndEffectorConstants.kCurrentLimit)
+            .apply(
+                new EncoderConfig()
+                    .positionConversionFactor(CoralEndEffectorConstants.kPositionConversionFactor)
+                    .velocityConversionFactor(CoralEndEffectorConstants.kVelocityConversionFactor)),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 

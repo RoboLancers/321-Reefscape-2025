@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Amp;
 import static edu.wpi.first.units.Units.Kilogram;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -12,6 +13,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import frc.robot.RobotConstants;
 
 @Logged
 // For when simulating the Elevator
@@ -34,7 +36,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
   // Updates Inputs w/ values from sim (Also tells sim how often to update itself)
   public void updateInputs(ElevatorInputs inputs) {
-    simMotor.update(0.02);
+    simMotor.update(RobotConstants.kRobotLoopPeriod.in(Seconds));
     inputs.height = Meters.of(simMotor.getPositionMeters());
     inputs.velocity = MetersPerSecond.of(simMotor.getVelocityMetersPerSecond());
     inputs.current = Amp.of(simMotor.getCurrentDrawAmps());

@@ -140,8 +140,10 @@ public interface SwerveDrive extends Subsystem {
   }
 
   // field relative auto drive w/ external pid controllers
+  // drives to field pose for ONE loop
   void driveToFieldPose(Pose2d pose);
 
+  // command wrapper for driving to field pose
   default Command driveToFieldPose(Supplier<Pose2d> pose) {
     return runOnce(
             () -> {

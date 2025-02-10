@@ -4,6 +4,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,6 +33,7 @@ import java.util.function.DoubleSupplier;
 
 @Logged
 public class RobotContainer {
+  // all subsystems
   private SwerveDrive drivetrain = SwerveDrive.create();
   private AlgaeIntakePivot algaePivot = AlgaeIntakePivot.create();
   private AlgaeIntakeRollers algaeRollers = AlgaeIntakeRollers.create();
@@ -39,40 +41,49 @@ public class RobotContainer {
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
+  // helper wrappers for the two main superstructure components of the robot
+  @NotLogged
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
+
+  @NotLogged
   private AlgaeSuperstructure algaeSuperstructure =
       new AlgaeSuperstructure(algaePivot, algaeRollers);
 
+  // controllers
   private CommandXboxController driver = new CommandXboxController(0);
-  private XboxController manipulator = new XboxController(1);
+  private XboxController manipulator = new XboxController(1); // button board for manipulator
 
+  // cached triggers and suppliers from controllers
+
+  // slow mode
   private Trigger isSlowMode = driver.leftBumper();
 
+  // drivetrain controls
   private DoubleSupplier driverForward =
       () ->
-          -MathUtils.deadband(driver.getLeftY(), 0.05)
+          -MathUtils.deadband(driver.getLeftY(), DrivetrainConstants.kDriveDeadband)
               * (isSlowMode.getAsBoolean()
-                  ? 2
+                  ? DrivetrainConstants.kSlowModeLinearVelocity.in(MetersPerSecond)
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
   private DoubleSupplier driverStrafe =
       () ->
-          -MathUtils.deadband(driver.getLeftX(), 0.05)
+          -MathUtils.deadband(driver.getLeftX(), DrivetrainConstants.kDriveDeadband)
               * (isSlowMode.getAsBoolean()
-                  ? 2
+                  ? DrivetrainConstants.kSlowModeLinearVelocity.in(MetersPerSecond)
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
-  private DoubleSupplier driverTurn = () -> -MathUtils.deadband(driver.getRightX(), 0.05) * 5;
+  private DoubleSupplier driverTurn = () -> -MathUtils.deadband(driver.getRightX(), DrivetrainConstants.kRotationDeadband) * 5;
 
   // robot queued states
   private ReefPosition queuedReefPosition = ReefPosition.NONE;
   private CoralScorerSetpoint queuedSetpoint = CoralScorerSetpoint.NEUTRAL;
 
+  // visualizer for the whole superstructure
   private SuperstructureVisualizer stateVisualizer =
       new SuperstructureVisualizer(
-          () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> algaePivot.getAngle());
+          elevator::getHeight, elevatorArm::getAngle, algaePivot::getAngle);
 
   public RobotContainer() {
-
     // home everything on robot start
     RobotModeTriggers.disabled()
         .negate()
@@ -85,12 +96,14 @@ public class RobotContainer {
     algaeRollers.setDefaultCommand(algaeRollers.stallIfHasAlgae());
     algaePivot.setDefaultCommand(algaePivot.goToAngle(() -> AlgaeSetpoint.NEUTRAL.getAlgaeAngle()));
 
+    // elevator default commands
     elevator.setDefaultCommand(
         elevator.goToHeight(() -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight()));
     elevatorArm.setDefaultCommand(
         elevatorArm.goToAngle(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
     coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralIfDetected());
 
+    // ensures that algae pivot doesn't hit elevator when it goes
     // when both are about to collide, move elevator out of the way until the algae pivot is out of
     // the collision zone
     new Trigger(algaePivot::inCollisionZone)
@@ -180,7 +193,6 @@ public class RobotContainer {
                                     drivetrain, ReefAlign.kMechanismDeadbandThreshold))
                         .asProxy()
                         .repeatedly()));
-
     new Trigger(() -> driver.getRightTriggerAxis() > 0.05 && driver.getRightTriggerAxis() < 0.8)
         .whileTrue(ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe));
 

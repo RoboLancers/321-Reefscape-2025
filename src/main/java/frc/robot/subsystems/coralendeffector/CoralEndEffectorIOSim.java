@@ -2,6 +2,7 @@
 package frc.robot.subsystems.coralendeffector;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -10,6 +11,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.RobotConstants;
 
 // implementation of the CoralEndEffectorIO that controls the simulated coral end effector
 @Logged
@@ -33,7 +35,7 @@ class CoralEndEffectorIOSim implements CoralEndEffectorIO {
 
   @Override
   public void updateInputs(CoralEndEffectorInputs inputs) {
-    simulation.update(0.02);
+    simulation.update(RobotConstants.kRobotLoopPeriod.in(Seconds));
     inputs.voltage = Volts.of(simulation.getInputVoltage());
     inputs.velocity = RPM.of(simulation.getAngularVelocityRPM());
     inputs.hasCoral = SmartDashboard.getBoolean("/SimInputs/CoralEndEffector/HasCoral", false);

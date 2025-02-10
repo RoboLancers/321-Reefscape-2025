@@ -12,7 +12,6 @@ import frc.robot.subsystems.coralendeffector.CoralEndEffector;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.util.TunableConstant;
-
 import java.util.function.Supplier;
 
 public class CoralSuperstructure {
@@ -50,10 +49,10 @@ public class CoralSuperstructure {
   public Command tune() {
     TunableConstant kTargetDistance = new TunableConstant("/CoralSuperstructure/TargetDistance", 0);
     TunableConstant kTargetAngle = new TunableConstant("/CoralSuperstructure/TargetAngle", 0);
-    
+
     return elevator
-    .goToHeight(() -> Meters.of(kTargetDistance.get()))
-    .alongWith(arm.goToAngle(() -> Degrees.of(kTargetAngle.get())));
+        .goToHeight(() -> Meters.of(kTargetDistance.get()))
+        .alongWith(arm.goToAngle(() -> Degrees.of(kTargetAngle.get())));
   }
 
   public enum CoralScorerSetpoint {

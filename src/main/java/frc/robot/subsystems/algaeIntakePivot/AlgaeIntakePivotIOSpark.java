@@ -23,7 +23,7 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
 
   public static final AlgaeIntakePivotConfig config = new AlgaeIntakePivotConfig(0, 0, 0, 0);
 
-  // device ids are plcaeholders
+  // device ids are placeholders
   private SparkMax pivotMotorLeft =
       new SparkMax(
           AlgaeIntakePivotConstants.kPivotMotorLeftId,
@@ -73,6 +73,7 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
   }
 
   public void updateInputs(AlgaeIntakePivotInputs inputs) {
+    // update inputs from left sparkmax motor
     inputs.pivotAngle = Degrees.of(pivotMotorLeft.getEncoder().getPosition());
     inputs.pivotVelocity = DegreesPerSecond.of(pivotMotorLeft.getEncoder().getVelocity());
     inputs.pivotCurrent = Amps.of(pivotMotorLeft.getOutputCurrent());

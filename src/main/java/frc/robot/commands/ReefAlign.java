@@ -251,7 +251,7 @@ public class ReefAlign {
         x, y, getNearestReefPose(swerveDrive.getPose()).getRotation().plus(kReefAlignmentRotation));
   }
 
-  // if robot is within 2 meters of either red or blue reef, auto-align will NOT work
+  // util method to determine whether to trigger reef alignment
   public static boolean isWithinReefRange(SwerveDrive drive, Distance deadband) {
     Pose2d centerPos = MyAlliance.isRed() ? kRedCenterAlignPos : kBlueCenterAlignPos;
     double deadbandDistance =

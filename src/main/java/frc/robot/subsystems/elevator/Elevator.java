@@ -28,7 +28,7 @@ public class Elevator extends SubsystemBase {
 
   private boolean isHomed = false;
 
-  private Distance targetHeight = ElevatorConstants.kElevatorStartingHeight; 
+  private Distance targetHeight = ElevatorConstants.kElevatorStartingHeight;
 
   // Method that creates the Elevator object as the real/sim io by checking if we're running a sim
   // or not
@@ -73,12 +73,10 @@ public class Elevator extends SubsystemBase {
 
   // Goes to height
   public void goToHeight(Distance targetHeight) {
-
     double motorOutput = pidController.calculate(inputs.height.in(Meters), targetHeight.in(Meters));
-
     double ff = feedForward.calculate(motorOutput);
 
-    this.targetHeight = targetHeight; 
+    this.targetHeight = targetHeight;
 
     setVoltage(Volts.of(motorOutput + ff));
   }
@@ -141,7 +139,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public Distance getTargetHeight() {
-    return targetHeight; 
+    return targetHeight;
   }
 
   public boolean elevatorIsHomed() {

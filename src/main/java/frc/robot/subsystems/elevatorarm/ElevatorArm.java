@@ -37,7 +37,7 @@ public class ElevatorArm extends SubsystemBase {
   // config for the arm
   private ElevatorArmConfig config;
 
-  private Angle targetAngle = ElevatorArmConstants.kStartAngle; 
+  private Angle targetAngle = ElevatorArmConstants.kStartAngle;
 
   // suppliers for game piece detection for variable feedforward for game pieces
   @NotLogged private BooleanSupplier hasCoral = () -> false;
@@ -96,7 +96,7 @@ public class ElevatorArm extends SubsystemBase {
         pidController.calculate(inputs.angle.in(Degrees), angle.in(Degrees))
             + feedforward.calculate(angle.plus(ElevatorArmConstants.kCMOffset).in(Radians), 0)
             + calculateGamepieceFeedforward(angle);
-    this.targetAngle = angle; 
+    this.targetAngle = angle;
     io.setVoltage(Volts.of(volts));
   }
 
@@ -172,6 +172,6 @@ public class ElevatorArm extends SubsystemBase {
   }
 
   public Angle getTargetAngle() {
-    return targetAngle; 
+    return targetAngle;
   }
 }

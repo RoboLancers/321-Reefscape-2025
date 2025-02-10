@@ -33,14 +33,14 @@ public class ElevatorArmConstants {
   // **** For simulation use ****
   // the MOI of the arm
   public static final double kElevatorArmMOI = 1; // TODO: find
-  // the length of the arm
-  public static final Distance kElevatorArmLength = Meters.of(0.5);
+  // the effective length of the arm
+  public static final Distance kElevatorArmLength = Meters.of(0.5); // TODO: find
   // the length of the arm (shoulder to elbow)
-  public static final Distance kArmLength = Meters.of(0.5);
+  public static final Distance kArmLength = Meters.of(0.5); //TODO: find
   // the length of the arm (elbow to wrist)
-  public static final Distance kElbowLength = Inches.of(10.98);
+  public static final Distance kElbowLength = Inches.of(10.98); // TODO: find
   // the fixed angle of the elbow (shoulder to elbow to wrist angle)
-  public static final Angle kElbowAngle = Degrees.of(80);
+  public static final Angle kElbowAngle = Degrees.of(80); // TODO: find
   // the maximum angle the arm can go in simulation
   public static final Angle kMaxAngle = Degrees.of(180);
   // the minimum angle the arm can go in simulation

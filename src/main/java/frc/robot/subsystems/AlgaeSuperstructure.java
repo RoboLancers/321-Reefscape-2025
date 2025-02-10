@@ -45,7 +45,7 @@ public class AlgaeSuperstructure {
 
   public Command tune() {
     TunableConstant kTargetAngle = new TunableConstant("/AlgaeSuperstructure/TargetAngle", 0);
-    
+
     return pivot.goToAngle(() -> Degrees.of(kTargetAngle.get()));
   }
 
