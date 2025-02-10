@@ -166,7 +166,7 @@ public class RobotContainer {
                 .onlyWhile(
                     () ->
                         ReefAlign.isWithinReefRange(
-                                drivetrain, RobotConstants.kMaxAlignmentDeadbandThreshold)
+                                drivetrain, ReefAlign.kMaxAlignmentDeadbandThreshold)
                             && Math.hypot(driverForward.getAsDouble(), driverStrafe.getAsDouble())
                                 <= 0.05)
                 .asProxy()
@@ -177,7 +177,7 @@ public class RobotContainer {
                         .onlyWhile(
                             () ->
                                 ReefAlign.isWithinReefRange(
-                                    drivetrain, RobotConstants.kMechanismDeadbandThreshold))
+                                    drivetrain, ReefAlign.kMechanismDeadbandThreshold))
                         .asProxy()
                         .repeatedly()));
 

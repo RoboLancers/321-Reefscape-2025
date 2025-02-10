@@ -51,6 +51,14 @@ public class ReefAlign {
           .filter(tag -> redReefTagIDs.contains(tag.ID))
           .toList();
 
+  public static final Pose2d kRedCenterAlignPos = new Pose2d(13, 4, new Rotation2d());
+  public static final Pose2d kBlueCenterAlignPos = new Pose2d(4.457, 4, new Rotation2d());
+
+  public static final Distance kMechanismDeadbandThreshold =
+      Meters.of(2); // distance to trigger mechanism
+  public static final Distance kMaxAlignmentDeadbandThreshold =
+      Meters.of(5); // distance to trigger alignment
+
   /**
    * This method is run during Robot#autonomousInit() and Robot#teleopInit() to save computations,
    * only the poses on the alliance reef are loaded
@@ -245,8 +253,7 @@ public class ReefAlign {
 
   // if robot is within 2 meters of either red or blue reef, auto-align will NOT work
   public static boolean isWithinReefRange(SwerveDrive drive, Distance deadband) {
-    Pose2d centerPos =
-        MyAlliance.isRed() ? RobotConstants.kRedCenterAlignPos : RobotConstants.kBlueCenterAlignPos;
+    Pose2d centerPos = MyAlliance.isRed() ? kRedCenterAlignPos : kBlueCenterAlignPos;
     double deadbandDistance =
         Math.hypot(
             drive.getPose().getX() - centerPos.getX(), drive.getPose().getY() - centerPos.getY());
