@@ -32,6 +32,8 @@ public class AlgaeIntakePivot extends SubsystemBase {
 
   private AlgaeIntakePivotConfig config;
 
+  private Angle targetAngle = AlgaeIntakePivotConstants.kPivotStartingAngle; 
+
   private boolean isHomed = false;
 
   public AlgaeIntakePivot(AlgaeIntakePivotIO io, AlgaeIntakePivotConfig config) {
@@ -84,6 +86,8 @@ public class AlgaeIntakePivot extends SubsystemBase {
             feedForward.calculate(desiredAngle.in(Radians), 0)
                 + algaeIntakeClimbController.calculate(
                     inputs.pivotAngle.in(Degrees), desiredAngle.in(Degrees)));
+
+    this.targetAngle = desiredAngle; 
 
     io.setPivotVoltage(desiredVoltage);
   }
@@ -152,6 +156,10 @@ public class AlgaeIntakePivot extends SubsystemBase {
 
   public Angle getAngle() {
     return inputs.pivotAngle;
+  }
+
+  public Angle getTargetAngle() {
+    return targetAngle; 
   }
 
   @Override

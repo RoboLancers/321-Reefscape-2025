@@ -1,7 +1,6 @@
 /* (C) Robolancers 2025 */
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.epilogue.Logged;
@@ -98,8 +97,7 @@ public class RobotContainer {
         .and(new Trigger(elevator::inCollisionZone))
         .onTrue(
             elevator
-                .goToHeight(() -> ElevatorConstants.kElevatorDangerHeight.plus(Meters.of(0.1)))
-                // .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+                .goToHeight(() -> ElevatorConstants.kElevatorDangerHeight)
                 .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
     configureBindings();
