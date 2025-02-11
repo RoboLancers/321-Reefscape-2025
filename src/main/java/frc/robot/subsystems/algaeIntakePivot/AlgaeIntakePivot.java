@@ -20,7 +20,9 @@ import frc.robot.subsystems.AlgaeSuperstructure.AlgaeSetpoint;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
-// the mechanism that intakes algae low and pivots back to hang from the deep cage
+/* The mechanism that intakes algae low and pivots back 
+ * to hang from the deep cage
+ */
 @Logged
 public class AlgaeIntakePivot extends SubsystemBase {
 
@@ -45,8 +47,8 @@ public class AlgaeIntakePivot extends SubsystemBase {
     feedForward = new ArmFeedforward(0, config.kG(), 0); // creates pid controller and feed forward
   }
 
-  // Tune PID and feed forward constants(kP, kI, kD, kG) live on smart dashboard / ascope
-  // so that we dont have to re run the code every time we change on of them.
+  /* Tune PID and feed forward constants(kP, kI, kD, kG) live on smart dashboard / ascope
+    so that we dont have to re run the code every time we change on of them. */
   public Command tune() {
     TunableConstant kP = new TunableConstant("/AlgaeIntakeClimbPivot/kP", config.kP());
     TunableConstant kI = new TunableConstant("/AlgaeIntakeClimbPivot/kI", config.kI());
@@ -181,8 +183,7 @@ public class AlgaeIntakePivot extends SubsystemBase {
         inputs.pivotAngle.plus(
             inputs.pivotVelocity.times(
                 RobotConstants.kRobotLoopPeriod.times(
-                    2))); // angle after looking forward in time n loops based on current arm
-    // velocity
+                    2))); // angle after looking forward in time n loops based on current arm velocity
 
     return effectiveAngle.compareTo(AlgaeIntakePivotConstants.kMinBlockedAngle) >= 0
         && effectiveAngle.compareTo(AlgaeIntakePivotConstants.kMaxBlockedAngle) <= 0;

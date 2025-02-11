@@ -5,7 +5,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 
-// below are inputs that the coral end effector will receive
+// Inputs that the coral end effector will receive
 @Logged
 public class CoralEndEffectorInputs {
   public Voltage voltage; // voltage the end effector motor is currently being commanded to run at

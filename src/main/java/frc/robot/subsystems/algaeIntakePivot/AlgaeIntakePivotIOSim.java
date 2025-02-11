@@ -24,8 +24,7 @@ public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
   private SingleJointedArmSim pivotSim;
 
   public AlgaeIntakePivotIOSim() {
-    // configures a simulated arm with two pivot motors controlling one
-    // pivot point
+    // configures a simulated arm with two pivot motors controlling one pivot point
     pivotSim =
         new SingleJointedArmSim(
             LinearSystemId.createSingleJointedArmSystem(

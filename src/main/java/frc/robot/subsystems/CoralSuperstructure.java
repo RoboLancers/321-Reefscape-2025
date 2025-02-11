@@ -26,8 +26,8 @@ public class CoralSuperstructure {
     this.endEffector = endEffector;
   }
 
-  // moves the entire elevator+arm superstructure to a desired state; this should be the go-to way
-  // of moving the superstructure, aside from the default subsystem commands
+  /* Moves the entire elevator+arm superstructure to a desired state; this should be the go-to way
+    of moving the superstructure, aside from the default subsystem commands */
   public Command goToSetpoint(Supplier<CoralScorerSetpoint> setpoint) {
     return elevator
         .goToHeight(() -> setpoint.get().getElevatorHeight())

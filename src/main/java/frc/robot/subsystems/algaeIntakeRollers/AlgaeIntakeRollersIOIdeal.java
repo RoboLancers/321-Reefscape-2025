@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.epilogue.Logged;
 
-// class for when the robot disables
+// Class for when the robot disables
 @Logged
 public class AlgaeIntakeRollersIOIdeal implements AlgaeIntakeRollersIO {
   public static final AlgaeIntakeRollersConfig config = new AlgaeIntakeRollersConfig(0, 0, 0, 0);

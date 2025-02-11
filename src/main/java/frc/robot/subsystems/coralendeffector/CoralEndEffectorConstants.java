@@ -7,7 +7,7 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
 
-// list of constants for the coral end effector
+// List of constants for the coral end effector
 public class CoralEndEffectorConstants {
   // Motor configuration
   public static final int kMotorPort = 0;

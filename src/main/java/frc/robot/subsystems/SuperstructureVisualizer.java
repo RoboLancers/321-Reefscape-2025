@@ -27,19 +27,24 @@ import java.util.function.Supplier;
 
 @Logged
 public class SuperstructureVisualizer extends VirtualSubsystem {
-  Mechanism2d mechanism;
-  MechanismLigament2d elevator;
-  MechanismLigament2d arm;
 
-  Supplier<Distance> elevatorSetpoint = () -> ElevatorConstants.kElevatorMinimumHeight;
-  Supplier<Angle> armSetpoint = () -> ElevatorArmConstants.kStartAngle;
-  Supplier<Angle> algaePivotSetpoint = () -> AlgaeIntakePivotConstants.kPivotStartingAngle;
 
-  Pose3d elevatorFirstStagePose = new Pose3d();
-  Pose3d elevatorSecondStagePose = new Pose3d();
-  Pose3d shoulderPose = new Pose3d();
-  Pose3d elbowPose = new Pose3d();
-  Pose3d algaeIntakePose = new Pose3d();
+  private Mechanism2d mechanism;
+  private MechanismLigament2d elevator;
+  private MechanismLigament2d arm;
+
+  private Supplier<Distance> elevatorSetpoint = () -> ElevatorConstants.kElevatorMinimumHeight;
+  private Supplier<Angle> armSetpoint = () -> ElevatorArmConstants.kStartAngle;
+  private Supplier<Angle> algaePivotSetpoint = () -> AlgaeIntakePivotConstants.kPivotStartingAngle;
+
+  private Pose3d elevatorFirstStagePose = new Pose3d();
+  private Pose3d elevatorSecondStagePose = new Pose3d();
+  private Pose3d shoulderPose = new Pose3d();
+  private Pose3d elbowPose = new Pose3d();
+  private Pose3d algaeIntakePose = new Pose3d();
+
+  /* Constructor that establishes the characteristics of our robot superstructure
+   */
 
   public SuperstructureVisualizer(
       Supplier<Distance> elevatorSetpoint,

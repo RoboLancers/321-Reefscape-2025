@@ -37,8 +37,8 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class DrivetrainSim implements SwerveDrive {
   private final SelfControlledSwerveDriveSimulationWrapper simulatedDrive;
   private final Field2d field2d;
-  final DriveTrainSimulationConfig simConfig;
-  PIDController headingController;
+  private final DriveTrainSimulationConfig simConfig;
+  private PIDController headingController;
 
   public DrivetrainSim() {
     this.simConfig =
@@ -80,6 +80,10 @@ public class DrivetrainSim implements SwerveDrive {
     configureAutoBuilder();
     configurePoseControllers();
   }
+
+  /* 
+   * Command for Teleop Drive.
+   */
 
   @Override
   public Command teleopDrive(

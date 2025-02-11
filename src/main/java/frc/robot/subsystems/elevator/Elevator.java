@@ -30,8 +30,8 @@ public class Elevator extends SubsystemBase {
 
   private Distance targetHeight = ElevatorConstants.kElevatorStartingHeight;
 
-  // Method that creates the Elevator object as the real/sim io by checking if we're running a sim
-  // or not
+  /* Method that creates the Elevator object as the real/sim io by checking if we're running 
+      a sim or not */
   public static Elevator create() {
     return RobotBase.isReal()
         ? new Elevator(new ElevatorIOTalon(), ElevatorIOTalon.config)
@@ -42,8 +42,8 @@ public class Elevator extends SubsystemBase {
     return new Elevator(new ElevatorIOIdeal(), ElevatorIOIdeal.config);
   }
 
-  // Eleavtor Constructor
-  // Creates Elevator, sets initialized variables to the real/sim values from create() method above
+  /* Eleavtor Constructor
+      Creates Elevator, sets initialized variables to the real/sim values from create() method above */
   public Elevator(ElevatorIO io, ElevatorConfig config) {
     this.io = io;
     this.inputs = new ElevatorInputs();
@@ -55,9 +55,9 @@ public class Elevator extends SubsystemBase {
     io.setEncoderPosition(ElevatorConstants.kElevatorStartingHeight);
   }
 
-  // Below are methods & their commands for simple robot operations
-  // Because we need commands for when buttons are pressed, we create methods first then use
-  // run(()->{method})
+  /* Below are methods & their commands for simple robot operations
+    Because we need commands for when buttons are pressed, we create methods first then use
+    run(()->{method}) */
 
   // Sets voltage
   public void setVoltage(Voltage volts) {
@@ -89,11 +89,11 @@ public class Elevator extends SubsystemBase {
         });
   }
 
-  // Command to "home" the encoder (go to starting position & set encoder to said position)
-  // Sets voltage to a constant negative voltage
-  // Once current spikes (signaling motor running into resistance) & the V ~0, encoder speed is
-  // about zero
-  // set to 0
+  /* Command to "home" the encoder (go to starting position & set encoder to said position)
+      - Sets voltage to a constant negative voltage
+      - Once current spikes (signaling motor running into resistance) & the V ~0, encoder speed is
+        about zero
+      - Set to 0 */
   public Command homeEncoder() {
     return setVoltage(() -> ElevatorConstants.kHomingVoltage)
         .until(
@@ -110,8 +110,8 @@ public class Elevator extends SubsystemBase {
                 }));
   }
 
-  // When command is run, tunable constants are created & PID controller values & target height are
-  // set to said tunable values
+  /* When the command runs, tunable constants are created & PID controller values & target height are
+  // set to said tunable values */
   public Command tune() {
     TunableConstant kP = new TunableConstant("/Elevator/kP", config.kP());
     TunableConstant kI = new TunableConstant("/Elevator/kI", config.kI());

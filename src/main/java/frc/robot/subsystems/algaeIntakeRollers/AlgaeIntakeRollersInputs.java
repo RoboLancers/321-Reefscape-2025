@@ -7,5 +7,5 @@ import edu.wpi.first.units.measure.AngularVelocity;
 @Logged
 public class AlgaeIntakeRollersInputs {
   public AngularVelocity rollerVelocity; // speed that the rollers are spinning
-  public boolean hasAlgae; // if the mechanism has algae
+  public boolean hasAlgae; // if mechanism has algae
 }

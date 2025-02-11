@@ -19,8 +19,10 @@ public class AlgaeSuperstructure {
     this.rollers = rollers;
   }
 
-  // moves the entire elevator+arm superstructure to a desired state; this should be the go-to way
-  // of moving the superstructure, aside from the default subsystem commands
+  /* Moves the entire elevator+arm superstructure to a desired state; 
+  this should be the go-to way of moving the superstructure, 
+    aside from the default subsystem commands */
+    
   public Command goToSetpoint(AlgaeSetpoint setpoint) {
     return pivot.goToAngle(setpoint);
   }

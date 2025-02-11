@@ -76,7 +76,7 @@ public class AlgaeIntakePivotIOKraken implements AlgaeIntakePivotIO {
 
   public void setPivotVoltage(Voltage volts) {
     pivotMotorLeft.setControl(
-        voltageRequest.withOutput(volts)); // kraken implementation of setvoltage
+        voltageRequest.withOutput(volts)); // kraken implementation of setVoltage
     pivotMotorRight.setControl(followRequest);
   }
 

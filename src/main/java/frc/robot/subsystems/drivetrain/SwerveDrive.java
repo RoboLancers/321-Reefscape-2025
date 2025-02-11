@@ -26,7 +26,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /*
- * drive interface. A real and sim implementation is made out of this. Using this, so we can implement maplesim.
+ * Drive interface. A real and simulator implementation is made out of this. 
+ * Using this, we can implement MapleSim.
  */
 @Logged
 public interface SwerveDrive extends Subsystem {

@@ -4,7 +4,7 @@ package frc.robot.subsystems.coralendeffector;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
 
-// updates inputs and sets voltage
+// Updates inputs and sets voltage
 @Logged
 public interface CoralEndEffectorIO {
   default void updateInputs(CoralEndEffectorInputs inputs) {}
