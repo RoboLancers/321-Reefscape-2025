@@ -26,7 +26,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /*
- * drive interface. A real and sim implementation is made out of this. Using this, so we can implement maplesim.
+ * Drive interface. A real and simulator implementation is made out of this. 
+ * Using this, we can implement MapleSim.
  */
 @Logged
 public interface SwerveDrive extends Subsystem {
@@ -128,15 +129,31 @@ public interface SwerveDrive extends Subsystem {
   void driveRobotCentric(
       double translationX, double translationY, double rotation, DriveFeedforwards feedforwards);
 
-  // drive with heading controlled by PID
-  Command driveFixedHeading(
-      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation);
+  void driveFixedHeading(double translationX, double translationY, Rotation2d rotation);
 
-  // robot relative auto drive w/ external pid controllers
-  Command driveToRobotPose(Supplier<Pose2d> pose);
+  // drive with heading controlled by PID
+  default Command driveFixedHeading(
+      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation) {
+    return run(
+        () ->
+            driveFixedHeading(
+                translationX.getAsDouble(), translationY.getAsDouble(), rotation.get()));
+  }
 
   // field relative auto drive w/ external pid controllers
-  Command driveToFieldPose(Supplier<Pose2d> pose);
+  // drives to field pose for ONE loop
+  void driveToFieldPose(Pose2d pose);
+
+  // command wrapper for driving to field pose
+  default Command driveToFieldPose(Supplier<Pose2d> pose) {
+    return runOnce(
+            () -> {
+              xPoseController.reset();
+              yPoseController.reset();
+              thetaController.reset();
+            })
+        .andThen(run(() -> driveToFieldPose(pose.get())));
+  }
 
   void resetPose(Pose2d pose);
 

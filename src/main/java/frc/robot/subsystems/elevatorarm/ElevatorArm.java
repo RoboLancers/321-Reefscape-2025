@@ -18,12 +18,12 @@ import frc.robot.util.TunableConstant;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-// NOTE: Convention is: zeroed when coral intake CG is 90 degrees
-// TO ZERO: move coral intake such that CG is all the way down due to gravity, zero, then move it to
-// 90 deg, then
-// zero again
+/* Elevator Arm subsystem - represents the arm/pivot on the elevator
 
-// Elevator Arm subsystem - represents the arm/pivot on the elevator
+  NOTE: The Elevator Arm is zeroed when coral intake CG is 90 degrees
+  - TO ZERO: move coral intake such that CG is all the way down due to gravity, zero, 
+  then move it to 90 deg, then zero again 
+  */
 @Logged
 public class ElevatorArm extends SubsystemBase {
   // hardware abstraction for the arm
@@ -36,6 +36,8 @@ public class ElevatorArm extends SubsystemBase {
 
   // config for the arm
   private ElevatorArmConfig config;
+
+  private Angle targetAngle = ElevatorArmConstants.kStartAngle;
 
   // suppliers for game piece detection for variable feedforward for game pieces
   @NotLogged private BooleanSupplier hasCoral = () -> false;
@@ -94,6 +96,7 @@ public class ElevatorArm extends SubsystemBase {
         pidController.calculate(inputs.angle.in(Degrees), angle.in(Degrees))
             + feedforward.calculate(angle.plus(ElevatorArmConstants.kCMOffset).in(Radians), 0)
             + calculateGamepieceFeedforward(angle);
+    this.targetAngle = angle;
     io.setVoltage(Volts.of(volts));
   }
 
@@ -166,5 +169,9 @@ public class ElevatorArm extends SubsystemBase {
 
   public Angle getAngle() {
     return inputs.angle;
+  }
+
+  public Angle getTargetAngle() {
+    return targetAngle;
   }
 }

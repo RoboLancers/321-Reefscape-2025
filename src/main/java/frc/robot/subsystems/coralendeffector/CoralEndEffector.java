@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
-// coral end effector subsystem
+// Coral end effector subsystem
 @Logged
 public class CoralEndEffector extends SubsystemBase {
   private CoralEndEffectorInputs inputs;
@@ -50,8 +50,8 @@ public class CoralEndEffector extends SubsystemBase {
     io.updateInputs(inputs);
   }
 
-  // run the end effector at a certain specified velocity using PIDFF control
-  // Will only run once; For a continuous method, see runAtVelocity(Supplier<AngularVelocity>)
+  /** Runs the end effector at a certain specified velocity using feedforward control
+      Will only run once; for a continuous method, see runAtVelocity(Supplier<AngularVelocity>) */
   public void runAtVelocity(AngularVelocity velocity) {
     double output =
         endEffectorController.calculate(inputs.velocity.in(RPM), velocity.in(RPM))
@@ -59,7 +59,7 @@ public class CoralEndEffector extends SubsystemBase {
     io.setVoltage(Volts.of(output));
   }
 
-  // continuously run the end effector at a certain velocity supplied by the velocity supplier
+  // Continuously runs the end effector at a certain velocity supplied by the velocity supplier
   public Command runAtVelocity(Supplier<AngularVelocity> velocity) {
     return run(
         () -> {
@@ -67,7 +67,7 @@ public class CoralEndEffector extends SubsystemBase {
         });
   }
 
-  // shortcut to intake coral
+  // Shortcut to intake coral
   public Command intakeCoral() {
     return run(
         () -> {
@@ -75,7 +75,7 @@ public class CoralEndEffector extends SubsystemBase {
         });
   }
 
-  // shortcut to outtake coral
+  // Shortcut to outtake coral
   public Command outtakeCoral() {
     return run(
         () -> {
@@ -87,7 +87,7 @@ public class CoralEndEffector extends SubsystemBase {
     return run(() -> io.setVoltage(voltage.get()));
   }
 
-  // stalls coral if we have a coral; this should be the default command
+  // Stalls coral if we have a coral; this should be the default command
   public Command stallCoralIfDetected() {
     return run(
         () -> {
@@ -99,7 +99,7 @@ public class CoralEndEffector extends SubsystemBase {
         });
   }
 
-  // tune PIDFF of end effector
+  // Tune PIDFF of end effector
   public Command tune() {
     TunableConstant kP = new TunableConstant("/CoralEndEffector/kP", config.kP());
     TunableConstant kI = new TunableConstant("/CoralEndEffector/kI", config.kI());

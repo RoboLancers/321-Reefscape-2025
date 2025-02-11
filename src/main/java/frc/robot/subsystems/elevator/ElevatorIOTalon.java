@@ -21,11 +21,9 @@ public class ElevatorIOTalon implements ElevatorIO {
   public static final ElevatorConfig config = new ElevatorConfig(0, 0, 0, 0, 0);
 
   // Creates motor objects
-
   public TalonFX elevatorMotorLeft = new TalonFX(ElevatorConstants.kLeftMotorID);
 
   // NOTE: Right motor MAY be commented out in order to test one motor
-
   public TalonFX elevatorMotorRight = new TalonFX(ElevatorConstants.kRightMotorID);
 
   // Constructor: Sets up motors
@@ -61,7 +59,7 @@ public class ElevatorIOTalon implements ElevatorIO {
     elevatorMotorRight.getConfigurator().apply(configuration);
   }
 
-  // Sets power of motors w/voltage
+  // Sets power of motors with voltage
   public void setVoltage(Voltage Volts) {
     elevatorMotorLeft.setVoltage(Volts.in(Volt));
     elevatorMotorRight.setControl(

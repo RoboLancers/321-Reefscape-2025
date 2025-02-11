@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -38,8 +37,8 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class DrivetrainSim implements SwerveDrive {
   private final SelfControlledSwerveDriveSimulationWrapper simulatedDrive;
   private final Field2d field2d;
-  final DriveTrainSimulationConfig simConfig;
-  PIDController headingController;
+  private final DriveTrainSimulationConfig simConfig;
+  private PIDController headingController;
 
   public DrivetrainSim() {
     this.simConfig =
@@ -81,6 +80,10 @@ public class DrivetrainSim implements SwerveDrive {
     configureAutoBuilder();
     configurePoseControllers();
   }
+
+  /* 
+   * Command for Teleop Drive.
+   */
 
   @Override
   public Command teleopDrive(
@@ -156,76 +159,32 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+  public void driveToFieldPose(Pose2d pose) {
 
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
+    ChassisSpeeds targetSpeeds =
+        new ChassisSpeeds(
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+
+    simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
   }
 
   @Override
-  public Command driveToFieldPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+  public void driveFixedHeading(double translationX, double translationY, Rotation2d rotation) {
+    ChassisSpeeds speeds =
+        flipFieldSpeeds(
+            new ChassisSpeeds(
+                translationX,
+                translationY,
+                headingController.calculate(
+                    getPose().getRotation().getRadians(), rotation.getRadians())));
 
-                  simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
-                }));
-  }
-
-  @Override
-  public Command driveFixedHeading(
-      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation) {
-    return run(
-        () -> {
-          ChassisSpeeds speeds =
-              flipFieldSpeeds(
-                  new ChassisSpeeds(
-                      translationX.getAsDouble(),
-                      translationY.getAsDouble(),
-                      headingController.calculate(
-                          getPose().getRotation().getRadians(), rotation.get().getRadians())));
-
-          simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), true, false);
-        });
+    simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), true, false);
   }
 
   @Override
@@ -299,6 +258,8 @@ public class DrivetrainSim implements SwerveDrive {
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());
     field2d.getObject("odometry").setPose(getPose());
+
+    resetPose(getActualPose());
   }
 
   @Logged(name = "RobotLeftAligned")

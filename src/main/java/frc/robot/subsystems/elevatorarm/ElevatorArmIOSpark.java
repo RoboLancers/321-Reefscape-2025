@@ -3,7 +3,6 @@ package frc.robot.subsystems.elevatorarm;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.PWM1Configs;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -31,7 +30,7 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
   private SparkMax armMotor =
       new SparkMax(ElevatorArmConstants.kElevatorArmId, MotorType.kBrushless);
 
-  // TODO: if elec uses a CANdi, use this for encoder output
+  // TODO: if elec uses direct wiring, use this for encoder output
   // absolute encoder from 0 to 360
   // private DutyCycleEncoder armEncoder =
   //     new DutyCycleEncoder(
@@ -39,6 +38,7 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
   //         360,
   //         ElevatorArmConstants.kAbsoluteEncoderOffset.in(Degrees));
 
+  
   private CANdi encoderCandi = new CANdi(ElevatorArmConstants.kEncoderCANdiId);
 
   public ElevatorArmIOSpark() {
@@ -73,10 +73,6 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
 
   // set voltage to the arm motor
   public void setVoltage(Voltage volts) {
-    double voltsWithStall = volts.in(Volts);
-    // TODO: uncomment if arm gearbox exploding becomes an actual issue
-    // if (armMotor.getOutputCurrent() > 40) voltsWithStall /= 60; // jank way to make the motor
-    // essentially stop
-    armMotor.setVoltage(voltsWithStall);
+    armMotor.setVoltage(volts);
   }
 }

@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
-// the same mechanism as algaeIntakeClimb but this controls the rollers instead of the pivot
+/** The same mechanism as algaeIntakeClimb but this controls the rollers instead of the pivot
+    NOTE: + voltage = intake */
 @Logged
 public class AlgaeIntakeRollers extends SubsystemBase {
 
@@ -26,15 +27,6 @@ public class AlgaeIntakeRollers extends SubsystemBase {
   private SimpleMotorFeedforward feedForward;
 
   private AlgaeIntakeRollersConfig config;
-
-  public AlgaeIntakeRollers(AlgaeIntakeRollersIO io, AlgaeIntakeRollersConfig config) {
-    this.io = io;
-    this.inputs = new AlgaeIntakeRollersInputs();
-    this.config = config;
-
-    rollerController = new PIDController(config.kP(), config.kI(), config.kD());
-    feedForward = new SimpleMotorFeedforward(0, config.kV());
-  }
 
   public static AlgaeIntakeRollers create() {
     return RobotBase.isReal()
@@ -50,8 +42,17 @@ public class AlgaeIntakeRollers extends SubsystemBase {
         new AlgaeIntakeRollersIOIdeal(), AlgaeIntakeRollersIOIdeal.config);
   }
 
-  // Tune PID and feed forward constants(kP, kI, kD, kG) live on smart dashboard
-  // so that we dont have to re run the code every time we change on of them.
+  public AlgaeIntakeRollers(AlgaeIntakeRollersIO io, AlgaeIntakeRollersConfig config) {
+    this.io = io;
+    this.inputs = new AlgaeIntakeRollersInputs();
+    this.config = config;
+
+    rollerController = new PIDController(config.kP(), config.kI(), config.kD());
+    feedForward = new SimpleMotorFeedforward(0, config.kV());
+  }
+
+    /** Tune PID and feedforward constants(kP, kI, kD, kG) live on SmartDashboard
+        so that we dont have to re-run the code every time we change one of them. */
   public Command tune() {
     TunableConstant kP = new TunableConstant("/AlgaeIntakeRollers/kP", config.kP());
     TunableConstant kI = new TunableConstant("/AlgaeIntakeRollers/kI", config.kI());
@@ -97,7 +98,7 @@ public class AlgaeIntakeRollers extends SubsystemBase {
     return run(() -> spinRollers(volts.get()));
   }
 
-  // stall the algae motor if we see that we have an algae. Should be the default command
+  // stalls algae motor if algae is detected. Should be the default command
   public Command stallIfHasAlgae() {
     return run(
         () -> {
@@ -109,7 +110,7 @@ public class AlgaeIntakeRollers extends SubsystemBase {
         });
   }
 
-  @Override // updates inputs constatly
+  @Override // updates inputs constantly 
   public void periodic() {
     io.updateInputs(inputs);
   }

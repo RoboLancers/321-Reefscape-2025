@@ -23,10 +23,10 @@ public class AlgaeIntakePivotConstants {
   public static final int kPivotMotorRightId = 0;
 
   // pivot thresholds
-  public static final Angle kMinBlockedAngle = Degrees.of(20); // TODO: find these
+  public static final Angle kMinBlockedAngle = Degrees.of(20); // TODO: find these from mechanical
   public static final Angle kMaxBlockedAngle = Degrees.of(40);
   // setpoint constants
-  public static final Angle kPivotClimbThreshold = Degrees.of(45); // to be tuned
+  public static final Angle kPivotClimbThreshold = Degrees.of(45); // TODO: tune
 
   // pivot homing
   public static final Voltage kHomingVoltage = Volts.of(-2);
@@ -34,20 +34,14 @@ public class AlgaeIntakePivotConstants {
   public static final AngularVelocity kHomingVelocityThreshold = DegreesPerSecond.of(2);
 
   // physical constants
-  public static final double kPivotGearing = 150; // this
-  public static final Distance kPivotLength = Inches.of(0.6); // this
+  public static final double kPivotGearing =
+      22.0 / 14.0 * 64.0 / 16.0 * 25.0 / 1; // TODO: find these from mechanical
+  public static final Distance kPivotLength = Inches.of(0.6); // TODO: tune
   public static final Angle kPivotMinAngle = Degrees.of(0);
   public static final Angle kPivotMaxAngle = Degrees.of(180);
   public static final Angle kPivotStartingAngle = Degrees.of(0);
-  public static final double kPivotMOI = 0.1; // this
-  public static final Angle kPivotIntakeAngle =
-      Degrees.of(80); // TODO: dummy angles; test these angles
-  public static final Angle kPivotOuttakeAngle = Degrees.of(90);
-  public static final Angle kPivotStoreAngle =
-      Degrees.of(70); // the angle the pivot will be at by default
-  public static final Angle kPivotClimbAngle = Degrees.of(45);
-  public static final Angle kPivotFloorAngle = Degrees.of(0);
-  public static final Voltage kPivotClimbVoltage = Volts.of(-8);
+  public static final double kPivotMOI = 0.1; // TODO: tune
+  public static final Voltage kPivotClimbVoltage = Volts.of(-8); // TODO: tune
 
   // motor configurations
   public static final boolean kLeftInverted = false;

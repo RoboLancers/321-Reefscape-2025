@@ -1,6 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.algaeIntakePivot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
@@ -15,6 +16,7 @@ public class AlgaeIntakePivotIOIdeal implements AlgaeIntakePivotIO {
   public void updateInputs(AlgaeIntakePivotInputs inputs) {
     inputs.pivotAngle = Degrees.of(0);
     inputs.pivotVelocity = DegreesPerSecond.of(0);
+    inputs.pivotCurrent = Amps.of(0);
   }
 
   public void setPivotVoltage(Voltage volts) {}

@@ -24,8 +24,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotConstants;
+
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 /*
  * Real Drivetrain using CTRE SwerveDrivetrain and SwerveRequests
@@ -68,7 +69,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                   translationX.getAsDouble(),
                   translationY.getAsDouble(),
                   rotation.getAsDouble(),
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+                  RobotConstants.kRobotLoopPeriod.in(Seconds));
 
           // x braking
           // if(Math.abs(newTranslationX) < DriveConstants.kDriveDeadband &&
@@ -103,7 +104,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                   translationX.getAsDouble(),
                   translationY.getAsDouble(),
                   0,
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+                  RobotConstants.kRobotLoopPeriod.in(Seconds));
 
           setControl(
               fieldCentricFacingAngleRequest
@@ -125,7 +126,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                   translationX.getAsDouble(),
                   translationY.getAsDouble(),
                   rotation.getAsDouble(),
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+                  RobotConstants.kRobotLoopPeriod.in(Seconds));
 
           setControl(
               fieldCentricRequest
@@ -153,7 +154,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
       double translationX, double translationY, double rotation, DriveFeedforwards feedforwards) {
     // var speeds =
     //     ChassisSpeeds.discretize(
-    //         translationX, translationY, rotation, DrivetrainConstants.kLoopDt.in(Seconds));
+    //         translationX, translationY, rotation, RobotConstants.kRobotLoopPeriod.in(Seconds));
 
     var speeds = new ChassisSpeeds(translationX, translationY, rotation);
 
@@ -164,92 +165,42 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons()));
   }
-  ;
 
   @Override
-  public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  var targetSpeeds =
-                      ChassisSpeeds.discretize(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
-                          DrivetrainConstants.kLoopDt.in(Seconds));
+  public void driveToFieldPose(Pose2d pose) {
+    var targetSpeeds =
+        ChassisSpeeds.discretize(
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
+                RobotConstants.kRobotLoopPeriod.in(Seconds));
 
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
-  }
-
-  @Override
-  public Command driveToFieldPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  var targetSpeeds =
-                      ChassisSpeeds.discretize(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
-                          DrivetrainConstants.kLoopDt.in(Seconds));
-
-                  setControl(
-                      fieldCentricRequest
-                          .withDriveRequestType(DriveRequestType.Velocity)
-                          .withVelocityX(targetSpeeds.vxMetersPerSecond)
-                          .withVelocityY(targetSpeeds.vyMetersPerSecond)
-                          .withRotationalRate(targetSpeeds.omegaRadiansPerSecond));
-                }));
+    setControl(
+        fieldCentricRequest
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withVelocityX(targetSpeeds.vxMetersPerSecond)
+            .withVelocityY(targetSpeeds.vyMetersPerSecond)
+            .withRotationalRate(targetSpeeds.omegaRadiansPerSecond));
   }
 
   // drive with absolute heading control
   @Override
-  public Command driveFixedHeading(
-      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation) {
-    return run(
-        () -> {
-          var speeds =
-              ChassisSpeeds.discretize(
-                  translationX.getAsDouble(),
-                  translationY.getAsDouble(),
-                  0,
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+  public void driveFixedHeading(double translationX, double translationY, Rotation2d rotation) {
+    var speeds =
+        ChassisSpeeds.discretize(
+            translationX, translationY, 0, RobotConstants.kRobotLoopPeriod.in(Seconds));
 
-          setControl(
-              fieldCentricFacingAngleRequest
-                  .withDriveRequestType(DriveRequestType.Velocity)
-                  .withVelocityX(speeds.vxMetersPerSecond)
-                  .withVelocityY(speeds.vyMetersPerSecond)
-                  .withTargetDirection(rotation.get())
-                  .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
-        });
+    setControl(
+        fieldCentricFacingAngleRequest
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withVelocityX(speeds.vxMetersPerSecond)
+            .withVelocityY(speeds.vyMetersPerSecond)
+            .withTargetDirection(rotation)
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
   }
 
   @Override

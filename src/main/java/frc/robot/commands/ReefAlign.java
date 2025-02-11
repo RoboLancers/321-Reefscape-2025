@@ -38,11 +38,10 @@ public class ReefAlign {
   private static final Distance kLeftAlignDistance = Inches.of(-6.5);
   private static final Distance kReefDistance = Inches.of(14);
   private static final Distance kRightAlignDistance = Inches.of(6.5);
-  private static final Rotation2d kReefAlignmentRotation = Rotation2d.fromDegrees(180);
 
+  private static final Rotation2d kReefAlignmentRotation = Rotation2d.fromDegrees(270);
   private static final List<Integer> blueReefTagIDs = List.of(17, 18, 19, 20, 21, 22);
   private static final List<Integer> redReefTagIDs = List.of(6, 7, 8, 9, 10, 11);
-
   private static final List<AprilTag> blueReefTags =
       RobotConstants.kAprilTagFieldLayout.getTags().stream()
           .filter(tag -> blueReefTagIDs.contains(tag.ID))
@@ -51,6 +50,14 @@ public class ReefAlign {
       RobotConstants.kAprilTagFieldLayout.getTags().stream()
           .filter(tag -> redReefTagIDs.contains(tag.ID))
           .toList();
+
+  public static final Pose2d kRedCenterAlignPos = new Pose2d(13, 4, new Rotation2d());
+  public static final Pose2d kBlueCenterAlignPos = new Pose2d(4.457, 4, new Rotation2d());
+
+  public static final Distance kMechanismDeadbandThreshold =
+      Meters.of(2); // distance to trigger mechanism
+  public static final Distance kMaxAlignmentDeadbandThreshold =
+      Meters.of(5); // distance to trigger alignment
 
   /**
    * This method is run during Robot#autonomousInit() and Robot#teleopInit() to save computations,
@@ -178,12 +185,21 @@ public class ReefAlign {
             });
   }
 
+  public static void alignToReef(SwerveDrive drive, ReefPosition position) {
+    drive.driveToFieldPose(
+        switch (position) {
+          case ALGAE -> centerAlignPoses.get(getNearestReefID(drive.getPose()));
+          case LEFT -> leftAlignPoses.get(getNearestReefID(drive.getPose()));
+          case RIGHT -> rightAlignPoses.get(getNearestReefID(drive.getPose()));
+          default -> drive.getPose(); // more or less a no-op
+        });
+  }
+
   /**
    * Drives to align against the center of the nearest reef face (un;ess it's more than
    * kMaxAlignDistance away), no manual driving
    */
   public static Command goToNearestCenterAlign(SwerveDrive swerveDrive) {
-    System.out.println(swerveDrive.getPose());
     final Pose2d targetAlignPose = centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
     return swerveDrive
         .driveToFieldPose(() -> targetAlignPose)
@@ -212,7 +228,6 @@ public class ReefAlign {
    * than kMaxAlignDistance away), no manual driving
    */
   public static Command goToNearestRightAlign(SwerveDrive swerveDrive) {
-    System.out.println(swerveDrive.getPose());
     final Pose2d targetAlignPose = rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
     return swerveDrive
         .driveToFieldPose(() -> targetAlignPose)
@@ -228,6 +243,21 @@ public class ReefAlign {
     return swerveDrive.driveFixedHeading(
         x,
         y,
-        () -> getNearestReefPose(swerveDrive.getPose()).getRotation().plus(Rotation2d.k180deg));
+        () -> getNearestReefPose(swerveDrive.getPose()).getRotation().plus(kReefAlignmentRotation));
+  }
+
+  public static void rotateToNearestReefTag(SwerveDrive swerveDrive, double x, double y) {
+    swerveDrive.driveFixedHeading(
+        x, y, getNearestReefPose(swerveDrive.getPose()).getRotation().plus(kReefAlignmentRotation));
+  }
+
+  // util method to determine whether to trigger reef alignment
+  public static boolean isWithinReefRange(SwerveDrive drive, Distance deadband) {
+    Pose2d centerPos = MyAlliance.isRed() ? kRedCenterAlignPos : kBlueCenterAlignPos;
+    double deadbandDistance =
+        Math.hypot(
+            drive.getPose().getX() - centerPos.getX(), drive.getPose().getY() - centerPos.getY());
+
+    return deadbandDistance < deadband.in(Meters);
   }
 }

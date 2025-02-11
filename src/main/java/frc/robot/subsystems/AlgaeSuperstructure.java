@@ -5,26 +5,26 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.algaeIntakePivot.AlgaeIntakePivot;
 import frc.robot.subsystems.algaeIntakeRollers.AlgaeIntakeRollers;
+import frc.robot.util.TunableConstant;
 
 public class AlgaeSuperstructure {
 
   private AlgaeIntakePivot pivot;
   private AlgaeIntakeRollers rollers;
 
-  private AlgaeSetpoint targetState = AlgaeSetpoint.NEUTRAL;
-
   public AlgaeSuperstructure(AlgaeIntakePivot pivot, AlgaeIntakeRollers rollers) {
     this.pivot = pivot;
     this.rollers = rollers;
   }
 
-  // moves the entire elevator+arm superstructure to a desired state; this should be the go-to way
-  // of moving the superstructure, aside from the default subsystem commands
+  /* Moves the entire elevator+arm superstructure to a desired state; 
+  this should be the go-to way of moving the superstructure, 
+    aside from the default subsystem commands */
+    
   public Command goToSetpoint(AlgaeSetpoint setpoint) {
-    return Commands.runOnce(() -> targetState = setpoint).andThen(pivot.goToAngle(setpoint));
+    return pivot.goToAngle(setpoint);
   }
 
   public Command intakeAlgae() {
@@ -45,8 +45,10 @@ public class AlgaeSuperstructure {
     return this.pivot.climb();
   }
 
-  public AlgaeSetpoint getTargetState() {
-    return targetState;
+  public Command tune() {
+    TunableConstant kTargetAngle = new TunableConstant("/AlgaeSuperstructure/TargetAngle", 0);
+
+    return pivot.goToAngle(() -> Degrees.of(kTargetAngle.get()));
   }
 
   public enum AlgaeSetpoint {

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -12,6 +13,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.RobotConstants;
 
 @Logged
 public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
@@ -22,8 +24,7 @@ public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
   private SingleJointedArmSim pivotSim;
 
   public AlgaeIntakePivotIOSim() {
-    // configures a simulated arm with two pivot motors controlling one
-    // pivot point
+    // configures a simulated arm with two pivot motors controlling one pivot point
     pivotSim =
         new SingleJointedArmSim(
             LinearSystemId.createSingleJointedArmSystem(
@@ -43,8 +44,9 @@ public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
     pivotSim.setInputVoltage(volts.in(Volts));
   }
 
-  public void updateInputs(AlgaeIntakePivotInputs inputs) { // gets info to update inputs
-    pivotSim.update(0.02);
+  public void updateInputs(AlgaeIntakePivotInputs inputs) {
+    // gets info from sim to update inputs
+    pivotSim.update(RobotConstants.kRobotLoopPeriod.in(Seconds));
     inputs.pivotAngle = Radians.of(pivotSim.getAngleRads());
     inputs.pivotVelocity = RadiansPerSecond.of(pivotSim.getVelocityRadPerSec());
     inputs.pivotCurrent = Amps.of(pivotSim.getCurrentDrawAmps());

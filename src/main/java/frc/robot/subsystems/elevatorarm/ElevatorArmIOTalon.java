@@ -1,8 +1,6 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.elevatorarm;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -16,8 +14,8 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
- * Implementation of the ElevatorArmIO that controls a real ElevatorArm using a TalonFX Motor
- * Controller
+ * Implementation of the ElevatorArmIO that controls a real ElevatorArm using a 
+ * TalonFX Motor Controller
  */
 @Logged
 public class ElevatorArmIOTalon implements ElevatorArmIO {
@@ -28,8 +26,10 @@ public class ElevatorArmIOTalon implements ElevatorArmIO {
   // the motor that is controlling the arm (using a TalonFX controller)
   private TalonFX armMotor = new TalonFX(ElevatorArmConstants.kElevatorArmId);
 
+
   // TODO: if elec doesn't use a CANdi, use this for encoder output
   // absolute encoder from 0 to 360
+
   // private DutyCycleEncoder encoder =
   //     new DutyCycleEncoder(
   //         ElevatorArmConstants.kAbsoluteEncoderPort,
@@ -84,10 +84,6 @@ public class ElevatorArmIOTalon implements ElevatorArmIO {
 
   // set voltage to the arm motor
   public void setVoltage(Voltage volts) {
-    double voltsWithStall = volts.in(Volts);
-    // TODO: uncomment if arm gearbox exploding becomes an actual issue
-    // if (armMotor.getOutputCurrent() > 40) voltsWithStall /= 60; // jank way to make the motor
-    // essentially stop
-    armMotor.setControl(voltageRequest.withOutput(voltsWithStall));
+    armMotor.setControl(voltageRequest.withOutput(volts));
   }
 }

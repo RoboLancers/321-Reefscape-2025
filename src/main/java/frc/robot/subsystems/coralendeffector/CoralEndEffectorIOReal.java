@@ -10,12 +10,13 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Voltage;
 
-// implementation of the CoralEndEffectorIO that controls the real coral end effector using a
-// SparkMax motoro
+/* Implementation of the CoralEndEffectorIO that controls the real coral end effector using a
+    SparkMax motor */
 @Logged
 public class CoralEndEffectorIOReal implements CoralEndEffectorIO {
 
@@ -26,26 +27,30 @@ public class CoralEndEffectorIOReal implements CoralEndEffectorIO {
       distSensor; // TOF distance sensor for detecting whether or not there is a coral in the intake
 
   public CoralEndEffectorIOReal() {
-    // motor initializatio & configuration
+    // motor initialization & configuration
     this.motor = new SparkMax(CoralEndEffectorConstants.kMotorPort, MotorType.kBrushless);
     motor.configure(
         new SparkMaxConfig()
             .inverted(CoralEndEffectorConstants.kInvertedMotor)
-            .smartCurrentLimit(CoralEndEffectorConstants.kCurrentLimit),
+            .smartCurrentLimit(CoralEndEffectorConstants.kCurrentLimit)
+            .apply(
+                new EncoderConfig()
+                    .positionConversionFactor(CoralEndEffectorConstants.kPositionConversionFactor)
+                    .velocityConversionFactor(CoralEndEffectorConstants.kVelocityConversionFactor)),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    // init distance sensor
+    // initialize distance sensor
     distSensor = new TimeOfFlight(CoralEndEffectorConstants.kTimeOfFlightId);
   }
 
-  // sets voltage of the coral intake wheels
+  // Sets voltage of the coral intake wheels
   @Override
   public void setVoltage(Voltage voltage) {
     motor.setVoltage(voltage);
   }
 
-  // update inputs from the coral intake sensors
+  // Update inputs from the coral intake sensors
   @Override
   public void updateInputs(CoralEndEffectorInputs inputs) {
     inputs.voltage = Volts.of(motor.getBusVoltage());

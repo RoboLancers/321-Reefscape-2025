@@ -14,6 +14,5 @@ public interface AlgaeIntakePivotIO {
   default void updateInputs(AlgaeIntakePivotInputs inputs) {}
 
   // to update inputs
-
   default void resetEncoder(Angle angle) {}
 }
