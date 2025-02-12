@@ -27,6 +27,7 @@ import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.MathUtils;
 import frc.robot.util.ReefPosition;
 import java.util.function.DoubleSupplier;
@@ -44,6 +45,13 @@ public class RobotContainer {
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
   private AlgaeSuperstructure algaeSuperstructure =
       new AlgaeSuperstructure(algaePivot, algaeRollers);
+
+  private Vision vision =
+      Vision.create(
+          drivetrain::getPose,
+          (estimate, stdDevs) ->
+              drivetrain.addVisionMeasurement(
+                  estimate.estimatedPose.toPose2d(), estimate.timestampSeconds, stdDevs));
 
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
