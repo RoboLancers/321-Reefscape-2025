@@ -3,38 +3,59 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.3105532786885234,
-        "y": 2.6883709016393436
+        "x": 8.02425,
+        "y": 3.02075
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.881553278688523,
-        "y": 2.0448709016393445
+        "x": 7.26375,
+        "y": 2.8939999999999997
+      },
+      "isLocked": false,
+      "linkedName": "Starting 3"
+    },
+    {
+      "anchor": {
+        "x": 5.3105532786885234,
+        "y": 2.6883709016393436
+      },
+      "prevControl": {
+        "x": 5.022796313052523,
+        "y": 2.5203562334464684
+      },
+      "nextControl": {
+        "x": 5.526446902866184,
+        "y": 2.8144262190180056
       },
       "isLocked": false,
       "linkedName": "ReefR3"
     },
     {
       "anchor": {
-        "x": 1.786168032783052,
-        "y": 2.172899590167781
+        "x": 8.02425,
+        "y": 3.02075
       },
       "prevControl": {
-        "x": 2.7495000000000003,
-        "y": 2.114
+        "x": 7.336475409836066,
+        "y": 2.8801741803278684
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftCoral3"
+      "linkedName": "Starting 3"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.9732107157137038,
+      "rotationDegrees": 119.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "ArmLeftCoralIntake",
-      "waypointRelativePos": 0.23129496402877703,
+      "name": "ArmCoralOuttake",
+      "waypointRelativePos": 0.3046762589928057,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -55,7 +76,7 @@
   "folder": "Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 119.99999999999999
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

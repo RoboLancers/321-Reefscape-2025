@@ -50,6 +50,10 @@ public class CoralEndEffector extends SubsystemBase {
     io.updateInputs(inputs);
   }
 
+  public boolean hasCoral() {
+    return inputs.hasCoral;
+  }
+
   // run the end effector at a certain specified velocity using PIDFF control
   // Will only run once; For a continuous method, see runAtVelocity(Supplier<AngularVelocity>)
   public void runAtVelocity(AngularVelocity velocity) {
