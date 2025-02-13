@@ -27,7 +27,7 @@ public class StationAlign {
   public static final Map<Integer, Pose2d> stationPoses = new HashMap<>();
 
   private static final Distance kStationDistance = Inches.of(14);
-  private static final Rotation2d kStationAlignmentRotation = Rotation2d.fromDegrees(90);
+  private static final Rotation2d kStationAlignmentRotation = Rotation2d.fromDegrees(0);
 
   private static final List<Integer> blueStationTagIDs = List.of(12, 13);
   private static final List<Integer> redStationTagIDs = List.of(1, 2);

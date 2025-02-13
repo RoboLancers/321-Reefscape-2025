@@ -106,7 +106,7 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
     this.shoulderPose =
         new Pose3d(
             VisualizerConstants.armRoot3d.plus(new Translation3d(0, 0, startHeightToSetpoint)),
-            new Rotation3d(Radians.convertFrom(-arm.getAngle() - 90, Degrees), 0, 0));
+            new Rotation3d(0, Radians.convertFrom(-arm.getAngle() - 90, Degrees), 0));
 
     this.elbowPose =
         shoulderPose.transformBy(
@@ -117,7 +117,7 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
     this.algaeIntakePose =
         new Pose3d(
             VisualizerConstants.algaeRoot3d,
-            new Rotation3d(0, algaePivotSetpoint.get().in(Radians), 0));
+            new Rotation3d(-algaePivotSetpoint.get().in(Radians), 0, 0));
   }
 
   @Logged(name = "ElevatorFirstStage")

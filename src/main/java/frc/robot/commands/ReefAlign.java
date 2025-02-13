@@ -39,7 +39,7 @@ public class ReefAlign {
   private static final Distance kReefDistance = Inches.of(14);
   private static final Distance kRightAlignDistance = Inches.of(6.5);
 
-  private static final Rotation2d kReefAlignmentRotation = Rotation2d.fromDegrees(270);
+  private static final Rotation2d kReefAlignmentRotation = Rotation2d.fromDegrees(180);
   private static final List<Integer> blueReefTagIDs = List.of(17, 18, 19, 20, 21, 22);
   private static final List<Integer> redReefTagIDs = List.of(6, 7, 8, 9, 10, 11);
   private static final List<AprilTag> blueReefTags =

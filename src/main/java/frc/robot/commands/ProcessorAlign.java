@@ -28,7 +28,7 @@ public class ProcessorAlign {
   public static final Map<Integer, Pose2d> processorPoses = new HashMap<>();
 
   private static final Distance kProcessorDistance = Inches.of(14);
-  private static final Rotation2d kProcessorAlignmentRotation = Rotation2d.fromDegrees(180);
+  private static final Rotation2d kProcessorAlignmentRotation = Rotation2d.fromDegrees(90);
 
   private static final List<Integer> blueProcessorTagIDs = List.of(16);
   private static final List<Integer> redProcessorTagIDs = List.of(3);
