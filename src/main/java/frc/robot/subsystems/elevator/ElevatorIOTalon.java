@@ -6,9 +6,13 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Distance;
@@ -18,7 +22,7 @@ import edu.wpi.first.units.measure.Voltage;
 // For when Elevator is real
 public class ElevatorIOTalon implements ElevatorIO {
   // Creates config record w/ values
-  public static final ElevatorConfig config = new ElevatorConfig(0, 0, 0, 0, 0);
+  public static final ElevatorConfig config = new ElevatorConfig(50, 0, 0, 0.3, 0.1);
 
   // Creates motor objects
 
@@ -38,27 +42,53 @@ public class ElevatorIOTalon implements ElevatorIO {
     inputs.height =
         Meters.of(
             elevatorMotorLeft.getPosition().getValueAsDouble()
-                * ElevatorConstants.kPositionConversionFactor);
+                * ElevatorConstants.kElevatorConversion.in(Meters));
     inputs.velocity =
         MetersPerSecond.of(
             elevatorMotorLeft.getVelocity().getValueAsDouble()
-                * ElevatorConstants.kVelocityConversionFactor);
+                * ElevatorConstants.kElevatorConversion.in(Meters));
     inputs.current = Amps.of(elevatorMotorLeft.getStatorCurrent().getValueAsDouble());
   }
 
   // Method to setup L & R motor & encoders
   // NOTE: Right motor follows left & only left motor encoder is used
   private void setupMotors() {
-    TalonFXConfiguration configuration = new TalonFXConfiguration();
-    configuration.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.kCurrentLimit;
-    configuration.MotorOutput.Inverted =
-        ElevatorConstants.kLeftInverted
-            ? InvertedValue.CounterClockwise_Positive
-            : InvertedValue.Clockwise_Positive;
-    configuration.Feedback.SensorToMechanismRatio = ElevatorConstants.kElevatorGearing;
+    TalonFXConfiguration configurationLeft =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(ElevatorConstants.kCurrentLimit)
+                    .withStatorCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        ElevatorConstants.kLeftInverted
+                            ? InvertedValue.Clockwise_Positive
+                            : InvertedValue.CounterClockwise_Positive))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(ElevatorConstants.kElevatorGearing)
+                    .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor));
 
-    elevatorMotorLeft.getConfigurator().apply(configuration);
-    elevatorMotorRight.getConfigurator().apply(configuration);
+    TalonFXConfiguration configurationRight =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(ElevatorConstants.kCurrentLimit)
+                    .withStatorCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        ElevatorConstants.kRightInverted
+                            ? InvertedValue.Clockwise_Positive
+                            : InvertedValue.CounterClockwise_Positive))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(ElevatorConstants.kElevatorGearing)
+                    .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor));
+
+    elevatorMotorLeft.getConfigurator().apply(configurationLeft);
+    elevatorMotorRight.getConfigurator().apply(configurationRight);
   }
 
   // Sets power of motors w/voltage
@@ -70,8 +100,10 @@ public class ElevatorIOTalon implements ElevatorIO {
 
   // Sets encoder pos
   public void setEncoderPosition(Distance position) {
-    elevatorMotorLeft.setPosition(position.in(Meters));
-    elevatorMotorRight.setPosition(position.in(Meters));
+    elevatorMotorLeft.setPosition(
+        position.in(Meters) / ElevatorConstants.kElevatorConversion.in(Meters));
+    elevatorMotorRight.setPosition(
+        position.in(Meters) / ElevatorConstants.kElevatorConversion.in(Meters));
   }
 
   // Special case where encoder pos is reset to the initial/starting height

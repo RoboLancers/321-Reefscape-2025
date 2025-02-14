@@ -17,8 +17,8 @@ import edu.wpi.first.units.measure.Voltage;
 public class ElevatorConstants {
 
   // Elevator IDs
-  public static final int kLeftMotorID = 0;
-  public static final int kRightMotorID = 0;
+  public static final int kLeftMotorID = 13;
+  public static final int kRightMotorID = 14;
 
   // Elevator Physical Constants
   public static final double kElevatorGearing = 20;
@@ -38,7 +38,7 @@ public class ElevatorConstants {
 
   // Elevator Motor Configs
   public static final boolean kLeftInverted = false;
-  public static final boolean kRightInverted = false;
+  public static final boolean kRightInverted = true;
   public static final int kCurrentLimit = 40;
   public static final double kPositionConversionFactor =
       kElevatorConversion.in(Meters) / kElevatorGearing;
