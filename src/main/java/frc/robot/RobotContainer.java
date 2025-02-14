@@ -50,7 +50,7 @@ public class RobotContainer {
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
 
-  private Trigger isSlowMode = driver.leftBumper();
+  private Trigger isSlowMode = new Trigger(() -> false);
 
   private DoubleSupplier driverForward =
       () ->
