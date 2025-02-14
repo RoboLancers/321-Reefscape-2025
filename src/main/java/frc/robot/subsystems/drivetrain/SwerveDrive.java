@@ -109,6 +109,16 @@ public interface SwerveDrive extends Subsystem {
     return MyAlliance.isRed() ? rotation.plus(Rotation2d.k180deg) : rotation;
   }
 
+  void setAlignmentSetpoint(Pose2d setpoint);
+
+  /**
+   * Checks whether the translation components and rotation are within 1e-9, the WPILib default
+   * tolerance for equality
+   *
+   * @return whether the SwerveDrive is at the target alignment pose
+   */
+  boolean atPoseSetpoint();
+
   Command teleopDrive(
       DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation);
 

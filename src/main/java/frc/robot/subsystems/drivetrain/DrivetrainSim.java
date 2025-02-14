@@ -38,6 +38,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class DrivetrainSim implements SwerveDrive {
   private final SelfControlledSwerveDriveSimulationWrapper simulatedDrive;
   private final Field2d field2d;
+  private Pose2d alignmentSetpoint = Pose2d.kZero;
   final DriveTrainSimulationConfig simConfig;
   PIDController headingController;
 
@@ -219,6 +220,16 @@ public class DrivetrainSim implements SwerveDrive {
   @Override
   public void resetPose(Pose2d pose) {
     simulatedDrive.resetOdometry(pose);
+  }
+
+  @Override
+  public void setAlignmentSetpoint(Pose2d setpoint) {
+    alignmentSetpoint = setpoint;
+  }
+
+  @Override
+  public boolean atPoseSetpoint() {
+    return getPose().equals(alignmentSetpoint);
   }
 
   @Override

@@ -4,7 +4,6 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,27 +26,30 @@ public class StationAlign {
   public static final Map<Integer, Pose2d> stationPoses = new HashMap<>();
 
   private static final Distance kStationDistance = Inches.of(14);
-  private static final Rotation2d kStationAlignmentRotation = Rotation2d.fromDegrees(90);
+  private static final Rotation2d kStationAlignmentRotation = Rotation2d.kCCW_90deg;
 
-  private static final List<Integer> blueStationTagIDs = List.of(12, 13);
-  private static final List<Integer> redStationTagIDs = List.of(1, 2);
+  private static final Transform2d kStationAlignTransform =
+      new Transform2d(kStationDistance, Meter.zero(), kStationAlignmentRotation);
 
-  private static final List<AprilTag> blueStationTags =
-      RobotConstants.kAprilTagFieldLayout.getTags().stream()
-          .filter(tag -> blueStationTagIDs.contains(tag.ID))
-          .toList();
-  private static final List<AprilTag> redStationTags =
-      RobotConstants.kAprilTagFieldLayout.getTags().stream()
-          .filter(tag -> redStationTagIDs.contains(tag.ID))
-          .toList();
+  private static final int[] blueStationTagIDs = {12, 13};
+  private static final int[] redStationTagIDs = {1, 2};
+
+  private static final Pose2d[] blueStationTags = {
+    RobotConstants.kAprilTagFieldLayout.getTagPose(blueStationTagIDs[0]).get().toPose2d(),
+    RobotConstants.kAprilTagFieldLayout.getTagPose(blueStationTagIDs[1]).get().toPose2d()
+  };
+  private static final Pose2d[] redStationTags = {
+    RobotConstants.kAprilTagFieldLayout.getTagPose(redStationTagIDs[0]).get().toPose2d(),
+    RobotConstants.kAprilTagFieldLayout.getTagPose(redStationTagIDs[1]).get().toPose2d()
+  };
 
   /**
-   * This method is run during Robot#autonomousInit() and Robot#teleopInit() to save computations,
-   * only the station poses are loaded
+   * This method is run when DriverStation connects to save computations mid-match, only the station
+   * poses are loaded
    */
   public static void loadStationAlignmentPoses() {
-    List<Integer> stationTagIds = MyAlliance.isRed() ? redStationTagIDs : blueStationTagIDs;
-    for (Integer id : stationTagIds) {
+    int[] stationTagIds = MyAlliance.isRed() ? redStationTagIDs : blueStationTagIDs;
+    for (int id : stationTagIds) {
       stationPoses.computeIfAbsent(id, StationAlign::getNearestCenterAlign);
     }
   }
@@ -64,10 +66,10 @@ public class StationAlign {
 
     if (alliance.isEmpty()) return null;
 
-    List<AprilTag> stationTags =
-        alliance.get().equals(Alliance.Red) ? redStationTags : blueStationTags;
+    List<Pose2d> stationTagPoses =
+        List.of(alliance.get().equals(Alliance.Red) ? redStationTags : blueStationTags);
 
-    return robotPose.nearest(stationTags.stream().map(tag -> tag.pose.toPose2d()).toList());
+    return robotPose.nearest(stationTagPoses);
   }
 
   /**
@@ -104,9 +106,7 @@ public class StationAlign {
 
     Pose2d aprilTagPose = tagPose.get().toPose2d();
 
-    Pose2d resultPose =
-        aprilTagPose.plus(
-            new Transform2d(kStationDistance, Meter.zero(), kStationAlignmentRotation));
+    Pose2d resultPose = aprilTagPose.plus(kStationAlignTransform);
 
     return resultPose;
   }
@@ -114,7 +114,11 @@ public class StationAlign {
   /** Drives to align against the center of the nearest station, no manual driving */
   public static Command goToNearestCenterAlign(SwerveDrive swerveDrive) {
     return swerveDrive.driveToFieldPose(
-        () -> getNearestCenterAlign(getNearestStationID(swerveDrive.getPose())));
+        () -> {
+          final var target = stationPoses.get(getNearestStationID(swerveDrive.getPose()));
+          swerveDrive.setAlignmentSetpoint(target);
+          return target;
+        });
   }
 
   /** Maintain translational driving while rotating toward the nearest station tag */
