@@ -34,6 +34,7 @@ public class ProcessorAlign {
 
   private static final int blueProcessorTagID = 16;
   private static final int redProcessorTagID = 3;
+  private static final int[] allProcessorTagIDs = {3, 16};
 
   // TODO: use units
   public static final Pose2d kBlueProcessorPose = new Pose2d(5.983, 0.395, Rotation2d.kZero);
@@ -51,8 +52,10 @@ public class ProcessorAlign {
    * processor poses are loaded
    */
   public static void loadProcessorAlignmentPoses() {
-    int processorTagId = MyAlliance.isRed() ? redProcessorTagID : blueProcessorTagID;
-    processorPoses.computeIfAbsent(processorTagId, ProcessorAlign::getNearestAlign);
+    int[] processorTagIDs = allProcessorTagIDs;
+    for (int id : processorTagIDs) {
+      processorPoses.computeIfAbsent(id, ProcessorAlign::getNearestAlign);
+    }
   }
 
   /**
@@ -116,7 +119,7 @@ public class ProcessorAlign {
   public static Command goToNearestAlign(SwerveDrive swerveDrive) {
     return swerveDrive.driveToFieldPose(
         () -> {
-          final var target = processorPoses.get(getNearestProcessorID(swerveDrive.getPose()));
+          final Pose2d target = processorPoses.get(getNearestProcessorID(swerveDrive.getPose()));
           swerveDrive.setAlignmentSetpoint(target);
           return target;
         });

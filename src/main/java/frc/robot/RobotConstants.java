@@ -13,4 +13,8 @@ public class RobotConstants {
 
   public static final AprilTagFieldLayout kAprilTagFieldLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+
+  public static void loadAprilTags() {
+    System.out.println("kAprilTagFieldLayout()");
+  }
 }

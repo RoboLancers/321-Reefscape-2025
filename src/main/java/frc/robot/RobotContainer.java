@@ -3,11 +3,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -79,6 +77,7 @@ public class RobotContainer {
   private boolean isDriverOverride = false;
 
   public RobotContainer() {
+    RobotConstants.loadAprilTags();
 
     // home everything on robot start
     RobotModeTriggers.disabled()
@@ -90,19 +89,6 @@ public class RobotContainer {
         0 represents waiting forever for result (which blocks all robot code),
         take only a fraction of a robot loop to wait for status, which is fine since the Trigger runs every loop
     */
-    final var kDSConnectionCheckTimeout = RobotConstants.kRobotLoopPeriod.div(10);
-
-    new Trigger(() -> DriverStation.waitForDsConnection(kDSConnectionCheckTimeout.in(Seconds)))
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  // TODO: if this Trigger correctly determines DS connection, also load robot
-                  // alliance to RobotConstants to avoid extra lookups
-                  ReefAlign.loadReefAlignmentPoses();
-                  StationAlign.loadStationAlignmentPoses();
-                  ProcessorAlign.loadProcessorAlignmentPoses();
-                }));
-
     // drive
     drivetrain.setDefaultCommand(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn));
 

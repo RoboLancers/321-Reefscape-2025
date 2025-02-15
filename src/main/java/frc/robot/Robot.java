@@ -6,6 +6,9 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.ProcessorAlign;
+import frc.robot.commands.ReefAlign;
+import frc.robot.commands.StationAlign;
 import frc.robot.util.VirtualSubsystem;
 
 @Logged
@@ -25,6 +28,9 @@ public class Robot extends TimedRobot {
   public Robot() {
     m_robotContainer = new RobotContainer();
     Epilogue.bind(this);
+    ReefAlign.loadReefAlignmentPoses();
+    StationAlign.loadStationAlignmentPoses();
+    ProcessorAlign.loadProcessorAlignmentPoses();
   }
 
   @Override

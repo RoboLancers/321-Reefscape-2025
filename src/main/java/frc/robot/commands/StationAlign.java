@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
-import frc.robot.util.MyAlliance;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ public class StationAlign {
 
   private static final int[] blueStationTagIDs = {12, 13};
   private static final int[] redStationTagIDs = {1, 2};
+  private static final int[] allStationTagIDs = {1, 2, 12, 13};
 
   private static final Pose2d[] blueStationTags = {
     RobotConstants.kAprilTagFieldLayout.getTagPose(blueStationTagIDs[0]).get().toPose2d(),
@@ -48,7 +48,7 @@ public class StationAlign {
    * poses are loaded
    */
   public static void loadStationAlignmentPoses() {
-    int[] stationTagIds = MyAlliance.isRed() ? redStationTagIDs : blueStationTagIDs;
+    int[] stationTagIds = allStationTagIDs;
     for (int id : stationTagIds) {
       stationPoses.computeIfAbsent(id, StationAlign::getNearestCenterAlign);
     }
@@ -115,7 +115,7 @@ public class StationAlign {
   public static Command goToNearestCenterAlign(SwerveDrive swerveDrive) {
     return swerveDrive.driveToFieldPose(
         () -> {
-          final var target = stationPoses.get(getNearestStationID(swerveDrive.getPose()));
+          final Pose2d target = stationPoses.get(getNearestStationID(swerveDrive.getPose()));
           swerveDrive.setAlignmentSetpoint(target);
           return target;
         });

@@ -17,7 +17,6 @@ import frc.robot.RobotConstants;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.util.MyAlliance;
 import frc.robot.util.ReefPosition;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,20 +46,20 @@ public class ReefAlign {
       new Transform2d(kReefDistance, kRightAlignDistance, kReefAlignmentRotation);
   private static final List<Integer> blueReefTagIDs = List.of(17, 18, 19, 20, 21, 22);
   private static final List<Integer> redReefTagIDs = List.of(6, 7, 8, 9, 10, 11);
+  private static final List<Integer> allReefTagIDs =
+      List.of(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
 
   /*
    * binary search is O(log n) which should be faster than List#contains,
    * Collections#binarySearch guarantees the index returned is >= 0 only if the element is found
    */
   private static final List<Pose2d> blueReefTags =
-      RobotConstants.kAprilTagFieldLayout.getTags().stream()
-          .filter(tag -> Collections.binarySearch(blueReefTagIDs, tag.ID) >= 0)
-          .map(tag -> tag.pose.toPose2d())
+      blueReefTagIDs.stream()
+          .map(id -> RobotConstants.kAprilTagFieldLayout.getTagPose(id).get().toPose2d())
           .toList();
   private static final List<Pose2d> redReefTags =
-      RobotConstants.kAprilTagFieldLayout.getTags().stream()
-          .filter(tag -> Collections.binarySearch(redReefTagIDs, tag.ID) >= 0)
-          .map(tag -> tag.pose.toPose2d())
+      redReefTagIDs.stream()
+          .map(id -> RobotConstants.kAprilTagFieldLayout.getTagPose(id).get().toPose2d())
           .toList();
 
   // TODO: use units
@@ -77,8 +76,7 @@ public class ReefAlign {
    * on the alliance reef are loaded
    */
   public static void loadReefAlignmentPoses() {
-    final List<Integer> tagIDsToLoad = MyAlliance.isRed() ? redReefTagIDs : blueReefTagIDs;
-
+    List<Integer> tagIDsToLoad = allReefTagIDs;
     for (Integer id : tagIDsToLoad) {
       leftAlignPoses.computeIfAbsent(id, ReefAlign::getNearestLeftAlign);
       centerAlignPoses.computeIfAbsent(id, ReefAlign::getNearestCenterAlign);
@@ -185,7 +183,7 @@ public class ReefAlign {
       SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
     return swerveDrive.driveToFieldPose(
         () -> {
-          final var target =
+          final Pose2d target =
               switch (targetReefPosition.get()) {
                 case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
                 case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
@@ -197,7 +195,6 @@ public class ReefAlign {
         });
   }
 
-  // TODO: what is this used for?
   public static void alignToReef(SwerveDrive drive, ReefPosition position) {
     drive.driveToFieldPose(
         switch (position) {
@@ -217,7 +214,6 @@ public class ReefAlign {
         () -> getNearestReefPose(swerveDrive.getPose()).getRotation().plus(kReefAlignmentRotation));
   }
 
-  // TODO: what is this used for?
   public static void rotateToNearestReefTag(SwerveDrive swerveDrive, double x, double y) {
     swerveDrive.driveFixedHeading(
         x, y, getNearestReefPose(swerveDrive.getPose()).getRotation().plus(kReefAlignmentRotation));
