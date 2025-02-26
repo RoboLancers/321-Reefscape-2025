@@ -158,6 +158,29 @@ public class AlgaeIntakePivot extends SubsystemBase {
                 }));
   }
 
+  // public Command alternateCurrentClimb() {
+  //   Timer timer = new Timer();
+  //   return runOnce(timer::restart)
+  //       .andThen(
+  //           run(io::regulateClimbCurrent)
+  //               .until(() -> inputs.pivotAngle.in(Degrees)
+  //                   >= AlgaeIntakePivotConstants.kPivotClimbThreshold.in(Degrees)))
+  //       .finallyDo(() -> io.setPivotVoltage(Volts.of(0)));
+  // }
+
+  public Command alternateCurrentClimb() {
+    Timer timer = new Timer();
+    return runOnce(timer::restart)
+        .andThen(
+            run(() -> ((AlgaeIntakePivotIOSpark) io).regulateClimbCurrent())
+                .until(
+                    () ->
+                        inputs.pivotAngle.in(Degrees)
+                                >= AlgaeIntakePivotConstants.kPivotClimbThreshold.in(Degrees)
+                            || inputs.pivotCurrent.in(Amp) <= 0.0)) // Stop if cage slips
+        .finallyDo(() -> ((AlgaeIntakePivotIOSpark) io).stopClimbCurrent());
+  }
+
   public Command homeMechanism() {
     return setMechanismVoltage(() -> AlgaeIntakePivotConstants.kHomingVoltage)
         .until(
