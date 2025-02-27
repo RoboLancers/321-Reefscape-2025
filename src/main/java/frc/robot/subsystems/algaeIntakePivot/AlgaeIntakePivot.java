@@ -158,16 +158,10 @@ public class AlgaeIntakePivot extends SubsystemBase {
                 }));
   }
 
-  // public Command alternateCurrentClimb() {
-  //   Timer timer = new Timer();
-  //   return runOnce(timer::restart)
-  //       .andThen(
-  //           run(io::regulateClimbCurrent)
-  //               .until(() -> inputs.pivotAngle.in(Degrees)
-  //                   >= AlgaeIntakePivotConstants.kPivotClimbThreshold.in(Degrees)))
-  //       .finallyDo(() -> io.setPivotVoltage(Volts.of(0)));
-  // }
-
+  /*
+   * Alternate Climb implementation using Current and inspiration from 6328
+   * https://github.com/Mechanical-Advantage/RobotCode2025Public/blob/main/src/main/java/org/littletonrobotics/frc2025/subsystems/climber/Climber.java
+   */
   public Command alternateCurrentClimb() {
     Timer timer = new Timer();
     return runOnce(timer::restart)

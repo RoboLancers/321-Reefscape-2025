@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
 @Logged
@@ -20,4 +21,6 @@ public class AlgaeIntakePivotIOIdeal implements AlgaeIntakePivotIO {
   }
 
   public void setPivotVoltage(Voltage volts) {}
+
+  public void setPivotCurrent(Current current) {}
 }
