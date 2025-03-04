@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotConstants;
 import frc.robot.util.MyAlliance;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -74,6 +75,8 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
   private Pose2d alignmentSetpoint = Pose2d.kZero;
 
+  private RobotPoseEstimator FOMPoseEstimator;
+
   public DrivetrainReal(
       SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
     // create CTRE Swervedrivetrain
@@ -85,6 +88,8 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     this.reefPoseEstimator =
         new SwerveDrivePoseEstimator(
             getKinematics(), getHeading(), getModulePositions(), getPose());
+
+    this.FOMPoseEstimator = new RobotPoseEstimator(getKinematics(), getMeasuredModuleStates());
 
     SmartDashboard.putData("Drivetrain Pose Field", poseField);
   }
@@ -99,7 +104,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                   translationX.getAsDouble(),
                   translationY.getAsDouble(),
                   rotation.getAsDouble(),
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+                  RobotConstants.kRobotLoopPeriod.in(Seconds));
 
           // x braking
           // if(Math.abs(newTranslationX) < DriveConstants.kDriveDeadband &&
@@ -134,7 +139,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                   translationX.getAsDouble(),
                   translationY.getAsDouble(),
                   0,
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+                  RobotConstants.kRobotLoopPeriod.in(Seconds));
 
           setControl(
               fieldCentricFacingAngleRequest
@@ -156,7 +161,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                   translationX.getAsDouble(),
                   translationY.getAsDouble(),
                   rotation.getAsDouble(),
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+                  RobotConstants.kRobotLoopPeriod.in(Seconds));
 
           setControl(
               fieldCentricRequest
@@ -218,7 +223,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                                   getPose().getRotation().getRadians(),
                                   pose.get().getRotation().getRadians())
                               * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
-                          DrivetrainConstants.kLoopDt.in(Seconds));
+                          RobotConstants.kRobotLoopPeriod.in(Seconds));
 
                   driveRobotCentric(
                       targetSpeeds.vxMetersPerSecond,
@@ -236,7 +241,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
             yPoseController.calculate(getPose().getY(), pose.getY()),
             thetaController.calculate(
                 getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
-            DrivetrainConstants.kLoopDt.in(Seconds));
+            RobotConstants.kRobotLoopPeriod.in(Seconds));
 
     if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
 
@@ -261,7 +266,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   public void driveFixedHeading(double translationX, double translationY, Rotation2d rotation) {
     var speeds =
         ChassisSpeeds.discretize(
-            translationX, translationY, 0, DrivetrainConstants.kLoopDt.in(Seconds));
+            translationX, translationY, 0, RobotConstants.kRobotLoopPeriod.in(Seconds));
 
     setControl(
         fieldCentricFacingAngleRequest
@@ -353,6 +358,10 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
   @Override
   public void periodic() {
+    FOMPoseEstimator.update(getMeasuredModuleStates());
+    super.setStateStdDevs(FOMPoseEstimator.calculateRobotStdDev());
+    SmartDashboard.putBoolean("collision detected", FOMPoseEstimator.detectCollision());
+
     reefPoseEstimator.update(getHeading(), getModulePositions());
 
     if (DriverStation.isDisabled()) {
