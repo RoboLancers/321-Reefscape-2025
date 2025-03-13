@@ -8,7 +8,9 @@ import static edu.wpi.first.units.Units.Pounds;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ReefAlign;
+import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -44,6 +47,11 @@ public class DrivetrainSim implements SwerveDrive {
   PIDController headingController;
 
   private final SwerveDrivePoseEstimator reefPoseEstimator;
+  private final RobotPoseEstimator fomPoseEstimator;
+  private Pose2d fomPose = Pose2d.kZero;
+  private Pose2d visionPose = Pose2d.kZero;
+
+  @NotLogged private Matrix<N3, N1> visionStdDev = VecBuilder.fill(0, 0, 0);
 
   public DrivetrainSim() {
     this.simConfig =
@@ -85,6 +93,9 @@ public class DrivetrainSim implements SwerveDrive {
     this.reefPoseEstimator =
         new SwerveDrivePoseEstimator(
             simulatedDrive.getKinematics(), getHeading(), getModulePositions(), getPose());
+
+    this.fomPoseEstimator =
+        new RobotPoseEstimator(simulatedDrive.getKinematics(), getMeasuredModuleStates());
 
     configureAutoBuilder();
     configurePoseControllers();
@@ -314,16 +325,29 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
+  public void addVisionMeasurementFOM(VisionEstimate visionEstimate) {
+    this.visionPose = visionEstimate.estimate().estimatedPose.toPose2d();
+    this.visionStdDev = visionEstimate.stdDevs();
+  }
+
+  @Override
   public void periodic() {
     // update simulated drive and arena
     SimulatedArena.getInstance().simulationPeriodic();
     simulatedDrive.periodic();
 
     reefPoseEstimator.update(getHeading(), getModulePositions());
+    fomPoseEstimator.update(getMeasuredModuleStates());
+    fomPose = fomPoseEstimator.getWeightedRobotPose(getPose(), visionPose, visionStdDev);
 
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());
     field2d.getObject("odometry").setPose(getPose());
+  }
+
+  @Logged(name = "FOMPose")
+  public Pose2d getFomPose() {
+    return fomPose;
   }
 
   @Logged(name = "RobotLeftAligned")

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.util.MyAlliance;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -214,4 +215,6 @@ public interface SwerveDrive extends Subsystem {
    */
   void addReefVisionMeasurement(
       Pose2d visionRobotPose, double timeStampSeconds, Matrix<N3, N1> standardDeviations);
+
+  void addVisionMeasurementFOM(VisionEstimate visionEstimate);
 }

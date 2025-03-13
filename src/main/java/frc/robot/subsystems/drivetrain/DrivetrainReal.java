@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotConstants;
+import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.util.MyAlliance;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -353,6 +354,9 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     super.addVisionMeasurement(
         visionRobotPose, Utils.fpgaToCurrentTime(timeStampSeconds), standardDeviations);
   }
+
+  @Override
+  public void addVisionMeasurementFOM(VisionEstimate visionEstimate) {}
 
   @NotLogged private Alliance lastAlliance;
 
