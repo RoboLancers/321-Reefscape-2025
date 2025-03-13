@@ -62,11 +62,7 @@ public class RobotContainer {
           (drivetrain instanceof DrivetrainSim)
               ? ((DrivetrainSim) drivetrain)::getActualPose
               : drivetrain::getPose,
-          visionEst ->
-              drivetrain.addVisionMeasurement(
-                  visionEst.estimate().estimatedPose.toPose2d(),
-                  visionEst.estimate().timestampSeconds,
-                  visionEst.stdDevs()),
+          visionEst -> drivetrain.addVisionMeasurementFOM(visionEst),
           reefVisionEst ->
               drivetrain.addReefVisionMeasurement(
                   reefVisionEst.estimate().estimatedPose.toPose2d(),
