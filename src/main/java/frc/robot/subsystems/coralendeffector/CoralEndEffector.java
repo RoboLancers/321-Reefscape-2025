@@ -56,8 +56,10 @@ public class CoralEndEffector extends SubsystemBase {
   // Will only run once; For a continuous method, see runAtVelocity(Supplier<AngularVelocity>)
   public void runAtVelocity(AngularVelocity velocity) {
     double output =
-        endEffectorController.calculate(inputs.velocity.in(RPM), velocity.in(RPM))
-            + feedforward.calculate(velocity.in(RPM));
+        endEffectorController.calculate(
+                inputs.velocity.times(CoralEndEffectorConstants.kGearing).in(RPM),
+                velocity.times(CoralEndEffectorConstants.kGearing).in(RPM))
+            + feedforward.calculate(velocity.times(CoralEndEffectorConstants.kGearing).in(RPM));
     io.setVoltage(Volts.of(output));
   }
 

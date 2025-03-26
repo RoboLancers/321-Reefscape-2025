@@ -17,13 +17,13 @@ public class CoralEndEffectorConstants {
 
   // Physical constants
   public static final double kMomentOfInertia = 0.01;
-  public static final double kGearing = 1;
+  public static final double kGearing = 37 / (3 * 38);
 
   // Setpoints
-  public static final AngularVelocity kCoralIntakeRPM = RPM.of(3000);
-  public static final AngularVelocity kCoralOuttakeRPM = RPM.of(-1500);
-  public static final AngularVelocity kCoralStallRPM = RPM.of(500);
-  public static final AngularVelocity kAlgaeKnockRPM = RPM.of(-3000);
+  public static final AngularVelocity kCoralIntakeRPM = RPM.of(9243.243);
+  public static final AngularVelocity kCoralOuttakeRPM = RPM.of(-4621.622);
+  public static final AngularVelocity kCoralStallRPM = RPM.of(1540.541);
+  public static final AngularVelocity kAlgaeKnockRPM = RPM.of(-9243.243);
 
   // Tuned constants
   public static final Distance kDetectionRange = Millimeters.of(100);
