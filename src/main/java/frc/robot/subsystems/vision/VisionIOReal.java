@@ -2,9 +2,11 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.photonvision.PhotonCamera;
 
@@ -12,10 +14,10 @@ import org.photonvision.PhotonCamera;
 public class VisionIOReal implements VisionIO {
   private final List<Camera> cameras;
 
-  public VisionIOReal(CameraConfig... configs) {
+  public VisionIOReal(Supplier<Rotation3d> headingSup, CameraConfig... configs) {
     cameras =
         Stream.of(configs)
-            .map(config -> new Camera(config, new PhotonCamera(config.cameraName())))
+            .map(config -> new Camera(config, new PhotonCamera(config.cameraName()), headingSup))
             .toList();
   }
 

@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.simulation.AddressableLEDSim;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -73,7 +74,8 @@ public class RobotContainer {
               drivetrain.addReefVisionMeasurement(
                   reefVisionEst.estimate().estimatedPose.toPose2d(),
                   reefVisionEst.estimate().timestampSeconds,
-                  reefVisionEst.stdDevs()));
+                  reefVisionEst.stdDevs()),
+          () -> new Rotation3d(drivetrain.getHeading()));
 
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
