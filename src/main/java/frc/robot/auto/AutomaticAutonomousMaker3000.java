@@ -26,6 +26,7 @@ import frc.robot.util.ReefPosition;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 import org.json.simple.parser.ParseException;
 
 @Logged
@@ -103,7 +104,10 @@ public class AutomaticAutonomousMaker3000 {
 
   private Command storedAuto;
 
-  public AutomaticAutonomousMaker3000(SwerveDrive drive, CoralSuperstructure coralSuperstructure) {
+  public AutomaticAutonomousMaker3000(
+      SwerveDrive drive,
+      CoralSuperstructure coralSuperstructure,
+      IntPredicate useReefPoseEstimate) {
     this.drive = drive;
     this.coralSuperstructure = coralSuperstructure;
 
@@ -131,14 +135,17 @@ public class AutomaticAutonomousMaker3000 {
                       switch (preBuiltAuto.getSelected()) {
                         case TAXI ->
                             runPath(autoChooser.build().startingPosition.pathID + " to Brake");
-                        case TOPAUTO -> buildAuto(kTopLaneAuto);
-                        case MIDTOPAUTO -> buildAuto(kMidLaneTopAuto);
-                        case MIDBOTAUTO -> buildAuto(kMidLaneBotAuto);
-                        case BOTAUTO -> buildAuto(kBotLaneAuto);
-                        case MIDPRELOADAUTO -> buildAuto(kMidLaneBotPreloadAuto); // test auto again
+                        case TOPAUTO -> buildAuto(kTopLaneAuto, useReefPoseEstimate);
+                        case MIDTOPAUTO -> buildAuto(kMidLaneTopAuto, useReefPoseEstimate);
+                        case MIDBOTAUTO -> buildAuto(kMidLaneBotAuto, useReefPoseEstimate);
+                        case BOTAUTO -> buildAuto(kBotLaneAuto, useReefPoseEstimate);
+                        case MIDPRELOADAUTO ->
+                            buildAuto(
+                                kMidLaneBotPreloadAuto, useReefPoseEstimate); // test auto again
                         case MIDOPPOSITESIDEAUTO ->
-                            buildAuto(kMidLaneOppositeSideAuto); // test auto x2
-                        case CUSTOM -> buildAuto(autoChooser.build());
+                            buildAuto(
+                                kMidLaneOppositeSideAuto, useReefPoseEstimate); // test auto x2
+                        case CUSTOM -> buildAuto(autoChooser.build(), useReefPoseEstimate);
                         default -> new PathsAndAuto(Commands.none(), new ArrayList<>());
                       };
 
@@ -192,7 +199,7 @@ public class AutomaticAutonomousMaker3000 {
   }
 
   // Returns the path list for visualization and autonomous command
-  public PathsAndAuto buildAuto(CycleAutoConfig config) {
+  public PathsAndAuto buildAuto(CycleAutoConfig config, IntPredicate useReefPoseEstimate) {
     pathError = "";
     try {
       Command auto =
@@ -235,7 +242,8 @@ public class AutomaticAutonomousMaker3000 {
                   withScoring(
                       toPathCommand(pathNewGoalEndState, true),
                       config.scoringGroup.get(i).pole,
-                      config.scoringGroup.get(i).level));
+                      config.scoringGroup.get(i).level,
+                      useReefPoseEstimate));
           paths.add(path);
         } else {
 
@@ -269,7 +277,8 @@ public class AutomaticAutonomousMaker3000 {
                       withScoring(
                           toPathCommand(scorePathNewGoalEndState),
                           config.scoringGroup.get(i).pole,
-                          config.scoringGroup.get(i).level));
+                          config.scoringGroup.get(i).level,
+                          useReefPoseEstimate));
           lastReefSide = config.scoringGroup.get(i).reefSide;
 
           paths.add(intakePath);
@@ -320,7 +329,8 @@ public class AutomaticAutonomousMaker3000 {
                     coralSuperstructure.feedCoral().until(() -> coralSuperstructure.hasCoral())));
   }
 
-  public Command withScoring(Command path, Pole pole, Level level) {
+  public Command withScoring(
+      Command path, Pole pole, Level level, IntPredicate useReefPoseEstimate) {
     CoralScorerSetpoint setpoint =
         switch (level) {
           default -> CoralScorerSetpoint.L1;
@@ -342,25 +352,30 @@ public class AutomaticAutonomousMaker3000 {
                 .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected()))
         .andThen(
             ReefAlign.alignToReef(
-                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
-                .withDeadline(
+                drive,
+                () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT,
+                useReefPoseEstimate))
+        .asProxy()
+        .alongWith(
+            coralSuperstructure
+                .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                .asProxy())
+        .asProxy()
+        .withDeadline(
+            coralSuperstructure
+                .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
+                .until(() -> drive.atPoseSetpoint())
+                .withTimeout(2.5)
+                .andThen(
                     coralSuperstructure
-                        .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                        .goToSetpointProfiled(() -> setpoint)
                         .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                        .until(() -> drive.atPoseSetpoint())
-                        .withTimeout(2.5)
+                        .until(() -> coralSuperstructure.atTargetState(setpoint)))
+                .andThen(
+                    Commands.waitSeconds(0.5)
                         .andThen(
-                            coralSuperstructure
-                                .goToSetpointProfiled(() -> setpoint)
-                                .alongWith(
-                                    coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                                .until(() -> coralSuperstructure.atTargetState(setpoint)))
-                        .andThen(
-                            Commands.waitSeconds(0.5)
-                                .andThen(
-                                    coralSuperstructure
-                                        .outtakeCoral(() -> setpoint)
-                                        .withTimeout(0.5)))));
+                            coralSuperstructure.outtakeCoral(() -> setpoint).withTimeout(0.5))));
   }
 
   private Command toPathCommand(PathPlannerPath path, boolean zero) {

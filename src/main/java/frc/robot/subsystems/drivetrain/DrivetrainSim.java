@@ -172,13 +172,11 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public void driveToFieldPose(Pose2d pose) {
+  public void driveToFieldPose(Pose2d pose, Pose2d current) {
     if (pose == null) return;
 
-    final Pose2d currentPose = getPose();
-
     double distance =
-        currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation());
+        current.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation());
 
     // increase weighting of velocity from PID radius (weight = 0) to velocity radius (weight = 1)
     double autoFfFactor =
@@ -194,21 +192,20 @@ public class DrivetrainSim implements SwerveDrive {
 
     ChassisSpeeds targetSpeeds =
         ChassisSpeeds.discretize(
-            xPoseController.calculate(getPose().getX(), pose.getX())
+            xPoseController.calculate(current.getX(), pose.getX())
                 + xPoseController.getSetpoint().velocity * ffFactor,
-            yPoseController.calculate(getPose().getY(), pose.getY())
+            yPoseController.calculate(current.getY(), pose.getY())
                 + yPoseController.getSetpoint().velocity * ffFactor,
             thetaController.calculate(
-                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                    current.getRotation().getRadians(), pose.getRotation().getRadians())
                 + thetaController.getSetpoint().velocity * ffFactor,
             RobotConstants.kRobotLoopPeriod.in(Seconds));
 
-    if (currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
+    if (current.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
         < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
       targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
 
-    if (Math.abs(
-            currentPose.getRotation().minus(alignmentSetpoint.pose().getRotation()).getDegrees())
+    if (Math.abs(current.getRotation().minus(alignmentSetpoint.pose().getRotation()).getDegrees())
         < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees))
       targetSpeeds =
           new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);

@@ -15,4 +15,5 @@ public record VisionEstimate(
     EstimatedRobotPose estimate,
     Matrix<N3, N1> stdDevs,
     String sourceName,
-    CameraUsage sourceType) {}
+    CameraUsage sourceType,
+    EstimateType estimateType) {}

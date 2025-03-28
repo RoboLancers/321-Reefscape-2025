@@ -166,9 +166,13 @@ public interface SwerveDrive extends Subsystem {
   }
 
   // field relative auto drive w/ external pid controllers
-  void driveToFieldPose(Pose2d pose);
+  void driveToFieldPose(Pose2d target, Pose2d current);
 
-  default Command driveToFieldPose(Supplier<AlignmentSetpoint> pose) {
+  default Command driveToFieldPose(Supplier<Pose2d> pose) {
+    return driveToFieldPose(() -> new AlignmentSetpoint(pose.get(), true), this::getPose);
+  }
+
+  default Command driveToFieldPose(Supplier<AlignmentSetpoint> pose, Supplier<Pose2d> robotPose) {
     return runOnce(
             () -> {
               ChassisSpeeds speeds =
@@ -186,7 +190,7 @@ public interface SwerveDrive extends Subsystem {
             run(
                 () -> {
                   setAlignmentSetpoint(pose.get());
-                  driveToFieldPose(pose.get().pose);
+                  driveToFieldPose(pose.get().pose, robotPose.get());
                 }));
   }
 

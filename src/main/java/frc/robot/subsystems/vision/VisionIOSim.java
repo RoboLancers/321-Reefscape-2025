@@ -4,6 +4,7 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import java.util.ArrayList;
@@ -26,7 +27,10 @@ public class VisionIOSim implements VisionIO {
 
   @NotLogged private final List<VisionTargetSim> targets;
 
-  public VisionIOSim(Supplier<Pose2d> robotPoseSupplier, CameraConfig... configs) {
+  public VisionIOSim(
+      Supplier<Pose2d> robotPoseSupplier,
+      Supplier<Rotation2d> robotHeadingSupplier,
+      CameraConfig... configs) {
     this.sim = new VisionSystemSim("main");
     sim.addAprilTags(RobotConstants.kAprilTagFieldLayout);
 
@@ -37,7 +41,7 @@ public class VisionIOSim implements VisionIO {
                   final var camera = new PhotonCamera(config.cameraName());
                   final var cameraSim = new PhotonCameraSim(camera, config.calib().simProperties());
                   sim.addCamera(cameraSim, config.robotToCamera());
-                  return new Camera(config, camera);
+                  return new Camera(config, camera, robotHeadingSupplier);
                 })
             .toList();
 
@@ -54,6 +58,19 @@ public class VisionIOSim implements VisionIO {
         .map(Camera::tryLatestEstimate)
         .filter(Objects::nonNull)
         .toArray(VisionEstimate[]::new);
+  }
+
+  @Override
+  public boolean reefCameraCanSeeReefTag(int tagID) {
+    for (Camera camera : cameras) {
+      if (!camera.isReefCamera()) continue;
+
+      if (!camera.canSeeTag(tagID)) continue;
+
+      return true;
+    }
+
+    return false;
   }
 
   @Override

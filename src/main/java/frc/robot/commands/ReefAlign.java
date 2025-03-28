@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
 public class ReefAlign {
@@ -197,7 +198,9 @@ public class ReefAlign {
   }
 
   public static Command alignToReef(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      IntPredicate useReefPoseEstimate) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
@@ -211,12 +214,22 @@ public class ReefAlign {
                       };
 
                   return new AlignmentSetpoint(target, true);
+                },
+                () -> {
+                  final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+                  if (useReefPoseEstimate.test(nearestReefID)) {
+                    return swerveDrive.getReefVisionPose();
+                  } else {
+                    return swerveDrive.getPose();
+                  }
                 }))
         .finallyDo(() -> Leds.getInstance().isReefAligning = false);
   }
 
   public static Command alignToPrealignReef(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      IntPredicate useReefPoseEstimate) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
@@ -235,12 +248,22 @@ public class ReefAlign {
                               new Translation2d(kIntermediateDistance, Meters.zero()),
                               Rotation2d.kZero));
                   return new AlignmentSetpoint(target, false);
+                },
+                () -> {
+                  final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+                  if (useReefPoseEstimate.test(nearestReefID)) {
+                    return swerveDrive.getReefVisionPose();
+                  } else {
+                    return swerveDrive.getPose();
+                  }
                 }))
         .finallyDo(() -> Leds.getInstance().isReefAligning = false);
   }
 
   public static Command alignToTag(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      IntPredicate useReefPoseEstimate) {
     return swerveDrive.driveToFieldPose(
         () -> {
           Pose2d target =
@@ -258,10 +281,18 @@ public class ReefAlign {
               target.plus(new Transform2d(translationError.getX(), 0, Rotation2d.kZero));
 
           return new AlignmentSetpoint(newTarget, false);
+        },
+        () -> {
+          final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+          if (useReefPoseEstimate.test(nearestReefID)) {
+            return swerveDrive.getReefVisionPose();
+          } else {
+            return swerveDrive.getPose();
+          }
         });
   }
 
-  public static Command tuneAlignment(SwerveDrive swerveDrive) {
+  public static Command tuneAlignment(SwerveDrive swerveDrive, IntPredicate useReefPoseEstimate) {
     TunableConstant depth = new TunableConstant("/ReefAlign/Depth", kReefDistance.in(Inch));
     TunableConstant side = new TunableConstant("/ReefAlign/Side", kLeftAlignDistance.in(Inch));
 
@@ -273,6 +304,14 @@ public class ReefAlign {
                       new Transform2d(
                           Inches.of(depth.get()), Inches.of(side.get()), kReefAlignmentRotation));
           return new AlignmentSetpoint(pose, true);
+        },
+        () -> {
+          final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+          if (useReefPoseEstimate.test(nearestReefID)) {
+            return swerveDrive.getReefVisionPose();
+          } else {
+            return swerveDrive.getPose();
+          }
         });
   }
 
