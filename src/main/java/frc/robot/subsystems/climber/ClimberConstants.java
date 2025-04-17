@@ -48,7 +48,7 @@ public class ClimberConstants {
   public static final Angle kClimbThreshold = Degrees.of(0); // to be tuned
 
   public static final Voltage kClimbVoltageRampRate =
-      Volts.of(3); // placeholder, will need to tune this
+      Volts.of(6); // placeholder, will need to tune this
   public static final Voltage kClimbVoltage = Volts.of(12); // placeholder
 
   public static final Angle kControllerTolerance = Degrees.of(1);
