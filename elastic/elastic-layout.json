@@ -9,10 +9,10 @@
         "containers": [
           {
             "title": "AutoVisualizerField",
-            "x": 64.0,
-            "y": 448.0,
-            "width": 512.0,
-            "height": 256.0,
+            "x": 0.0,
+            "y": 256.0,
+            "width": 448.0,
+            "height": 320.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Autos/AutoVisualizerField",
@@ -42,7 +42,7 @@
           },
           {
             "title": "Starting Position",
-            "x": 512.0,
+            "x": 448.0,
             "y": 0.0,
             "width": 192.0,
             "height": 128.0,
@@ -55,7 +55,7 @@
           },
           {
             "title": "Reef Side0",
-            "x": 896.0,
+            "x": 704.0,
             "y": 0.0,
             "width": 192.0,
             "height": 128.0,
@@ -68,7 +68,7 @@
           },
           {
             "title": "Pole0",
-            "x": 1088.0,
+            "x": 896.0,
             "y": 0.0,
             "width": 192.0,
             "height": 128.0,
@@ -81,9 +81,9 @@
           },
           {
             "title": "Level0",
-            "x": 1280.0,
+            "x": 1088.0,
             "y": 0.0,
-            "width": 192.0,
+            "width": 128.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
@@ -94,9 +94,9 @@
           },
           {
             "title": "FeedLocation1",
-            "x": 512.0,
+            "x": 448.0,
             "y": 128.0,
-            "width": 192.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
@@ -107,7 +107,7 @@
           },
           {
             "title": "Reef Side2",
-            "x": 896.0,
+            "x": 704.0,
             "y": 256.0,
             "width": 192.0,
             "height": 128.0,
@@ -120,7 +120,7 @@
           },
           {
             "title": "Pole1",
-            "x": 1088.0,
+            "x": 896.0,
             "y": 128.0,
             "width": 192.0,
             "height": 128.0,
@@ -133,10 +133,10 @@
           },
           {
             "title": "Submit",
-            "x": 896.0,
-            "y": 448.0,
+            "x": 640.0,
+            "y": 384.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Autos/Submit",
@@ -146,7 +146,7 @@
           },
           {
             "title": "Reef Side1",
-            "x": 896.0,
+            "x": 704.0,
             "y": 128.0,
             "width": 192.0,
             "height": 128.0,
@@ -159,9 +159,9 @@
           },
           {
             "title": "Level1",
-            "x": 1280.0,
+            "x": 1088.0,
             "y": 128.0,
-            "width": 192.0,
+            "width": 128.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
@@ -172,7 +172,7 @@
           },
           {
             "title": "Pole2",
-            "x": 1088.0,
+            "x": 896.0,
             "y": 256.0,
             "width": 192.0,
             "height": 128.0,
@@ -185,9 +185,9 @@
           },
           {
             "title": "Level2",
-            "x": 1280.0,
+            "x": 1088.0,
             "y": 256.0,
-            "width": 192.0,
+            "width": 128.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
@@ -198,39 +198,13 @@
           },
           {
             "title": "FeedLocation2",
-            "x": 512.0,
+            "x": 448.0,
             "y": 256.0,
-            "width": 192.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
               "topic": "/SmartDashboard/Autos/FeedLocation2",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "CoralSide1",
-            "x": 704.0,
-            "y": 128.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Autos/CoralSide1",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "CoralSide2",
-            "x": 704.0,
-            "y": 256.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Autos/CoralSide2",
               "period": 0.06,
               "sort_options": false
             }
@@ -243,8 +217,8 @@
       "grid_layout": {
         "layouts": [
           {
-            "title": "getAngle",
-            "x": 576.0,
+            "title": "angle",
+            "x": 448.0,
             "y": 320.0,
             "width": 192.0,
             "height": 128.0,
@@ -261,34 +235,7 @@
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "Robot/RobotContainer/elevatorArm/getAngle/",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          },
-          {
-            "title": "end effector velocity",
-            "x": 704.0,
-            "y": 448.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Robot/RobotContainer/coralEndEffector/inputs/velocity/",
+                  "topic": "Robot/RobotContainer/elevatorArm/inputs/angle/",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false
@@ -299,22 +246,8 @@
         ],
         "containers": [
           {
-            "title": "getHeight",
-            "x": 896.0,
-            "y": 320.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "Robot/RobotContainer/elevator/getHeight",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "queuedReefPosition",
-            "x": 256.0,
+            "x": 128.0,
             "y": 320.0,
             "width": 256.0,
             "height": 128.0,
@@ -328,7 +261,7 @@
           },
           {
             "title": "queuedSetpoint",
-            "x": 256.0,
+            "x": 128.0,
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
@@ -342,7 +275,7 @@
           },
           {
             "title": "ArmSetpoint",
-            "x": 576.0,
+            "x": 448.0,
             "y": 192.0,
             "width": 192.0,
             "height": 128.0,
@@ -356,7 +289,7 @@
           },
           {
             "title": "ElevatorSetpoint",
-            "x": 896.0,
+            "x": 768.0,
             "y": 192.0,
             "width": 192.0,
             "height": 128.0,
@@ -370,7 +303,7 @@
           },
           {
             "title": "hasCoral",
-            "x": 576.0,
+            "x": 448.0,
             "y": 64.0,
             "width": 192.0,
             "height": 128.0,
@@ -387,7 +320,7 @@
           },
           {
             "title": "atSetpoint",
-            "x": 896.0,
+            "x": 768.0,
             "y": 64.0,
             "width": 192.0,
             "height": 128.0,
@@ -404,7 +337,7 @@
           },
           {
             "title": "inCollisionZone",
-            "x": 1216.0,
+            "x": 1024.0,
             "y": 192.0,
             "width": 192.0,
             "height": 192.0,
@@ -417,6 +350,20 @@
               "false_color": 4294198070,
               "true_icon": "None",
               "false_icon": "None"
+            }
+          },
+          {
+            "title": "height",
+            "x": 768.0,
+            "y": 320.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Robot/RobotContainer/elevator/inputs/height",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
             }
           }
         ]
@@ -584,7 +531,7 @@
         "containers": [
           {
             "title": "atPoseSetpoint",
-            "x": 128.0,
+            "x": 0.0,
             "y": 64.0,
             "width": 256.0,
             "height": 192.0,
@@ -601,7 +548,7 @@
           },
           {
             "title": "queuedReefPosition",
-            "x": 640.0,
+            "x": 384.0,
             "y": 0.0,
             "width": 256.0,
             "height": 128.0,
@@ -615,7 +562,7 @@
           },
           {
             "title": "queuedSetpoint",
-            "x": 640.0,
+            "x": 384.0,
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
@@ -629,7 +576,7 @@
           },
           {
             "title": "isSlowMode",
-            "x": 1088.0,
+            "x": 768.0,
             "y": 64.0,
             "width": 256.0,
             "height": 192.0,
@@ -645,39 +592,11 @@
             }
           },
           {
-            "title": "Robot x-speeds",
-            "x": 1152.0,
-            "y": 320.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "Robot/RobotContainer/drivetrain/Robot x-speeds",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Robot y-speeds",
-            "x": 1152.0,
-            "y": 448.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "Robot/RobotContainer/drivetrain/Robot y-speeds",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Drivetrain Pose Field",
-            "x": 64.0,
-            "y": 320.0,
-            "width": 512.0,
-            "height": 384.0,
+            "x": 0.0,
+            "y": 256.0,
+            "width": 448.0,
+            "height": 320.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Drivetrain Pose Field",
@@ -690,6 +609,19 @@
               "field_rotation": 0.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295
+            }
+          },
+          {
+            "title": "USB Camera 0",
+            "x": 576.0,
+            "y": 256.0,
+            "width": 448.0,
+            "height": 320.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/USB Camera 0",
+              "period": 0.06,
+              "rotation_turns": 0
             }
           }
         ]
