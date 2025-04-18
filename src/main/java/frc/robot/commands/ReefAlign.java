@@ -1,6 +1,8 @@
 /* (C) Robolancers 2025 */
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Centimeter;
+import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
@@ -41,9 +43,9 @@ public class ReefAlign {
   public static final Map<Integer, Pose2d> centerAlignPoses = new HashMap<>();
   public static final Map<Integer, Pose2d> rightAlignPoses = new HashMap<>();
 
-  private static final Distance kLeftAlignDistance = Inches.of(-9.081); // old: -8.9 // -9.1
+  private static final Distance kLeftAlignDistance = Inches.of(-9.081); //try: -8.9.minus(Centimeters.of(3)) // old: -8.9 // -9.1
   private static final Distance kReefDistance = Inches.of(17.5);
-  private static final Distance kRightAlignDistance = Inches.of(4.5); // 4.6 // 5.4
+  private static final Distance kRightAlignDistance = Inches.of(4.5); //try: 4.6.minus(Centimeters.of(2)) // 4.6 // 5.4
   private static final Distance kIntermediateDistance = Inches.of(-10);
 
   private static final Rotation2d kReefAlignmentRotation = Rotation2d.k180deg;
