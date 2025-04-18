@@ -365,6 +365,20 @@
               "data_type": "double",
               "show_submit_button": false
             }
+          },
+          {
+            "title": "Analog Sensor Value",
+            "x": 1024.0,
+            "y": 64.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Robot/RobotContainer/elevatorArm/io/armMotor/Analog Sensor Value",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
           }
         ]
       }
@@ -613,7 +627,7 @@
           },
           {
             "title": "USB Camera 0",
-            "x": 576.0,
+            "x": 448.0,
             "y": 256.0,
             "width": 448.0,
             "height": 320.0,
@@ -622,6 +636,64 @@
               "topic": "/CameraPublisher/USB Camera 0",
               "period": 0.06,
               "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Top Latency",
+            "x": 1024.0,
+            "y": 256.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/photonvision/Top Elevator Camera/latencyMillis",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Bottom Latency",
+            "x": 1024.0,
+            "y": 128.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/photonvision/Bottom Elevator Camera/latencyMillis",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "BackLeft Latency",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/photonvision/Back Left Swerve Module Camera/latencyMillis",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Match Time",
+            "x": 960.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Match Time",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 15,
+              "yellow_start_time": 30
             }
           }
         ]
