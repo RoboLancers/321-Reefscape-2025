@@ -40,6 +40,7 @@ import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.leds.LedsConstants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.CommandUtils;
 import frc.robot.util.ReefPosition;
 import java.util.function.DoubleSupplier;
 
@@ -122,7 +123,7 @@ public class RobotContainer {
 
   // robot queued states
   private ReefPosition queuedReefPosition = ReefPosition.RIGHT;
-  private CoralScorerSetpoint queuedSetpoint = CoralScorerSetpoint.L2;
+  private CoralScorerSetpoint queuedSetpoint = CoralScorerSetpoint.L4;
 
   private SuperstructureVisualizer stateVisualizer =
       new SuperstructureVisualizer(
@@ -154,6 +155,14 @@ public class RobotContainer {
               coralSuperstructure.getTargetAngle(),
               drivetrain.getPose(),
               drivetrain.getAlignmentSetpoint().pose());
+
+  private boolean isDealgaefying = false;
+
+  private Trigger autoDealgaefy =
+      new Trigger(
+          () ->
+              (queuedSetpoint == CoralScorerSetpoint.L3 || queuedSetpoint == CoralScorerSetpoint.L4)
+                  && isDealgaefying);
 
   public RobotContainer() {
 
@@ -406,6 +415,15 @@ public class RobotContainer {
                             // when we get close enough, align to reef, but only while we're
                             // close enough
                             Commands.sequence(
+                                    ReefAlign.alignToReef(drivetrain, () -> ReefPosition.ALGAE)
+                                        .until(
+                                            () ->
+                                                coralSuperstructure.atTargetState(
+                                                        CoralScorerSetpoint.KNOCK_ALGAE
+                                                            .getElevatorHeight(),
+                                                        queuedSetpoint.getArmAngle())
+                                                    || autoDealgaefy.negate().getAsBoolean())
+                                        .onlyIf(autoDealgaefy),
                                     // ReefAlign.alignToPrealignReef(
                                     //         drivetrain, () -> queuedReefPosition)
                                     //     .onlyWhile(
@@ -435,29 +453,66 @@ public class RobotContainer {
                         // when we get far away, repeat the command
                         .repeatedly())
                 .alongWith(
-                    coralSuperstructure
-                        .goToSetpointPID(
-                            () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                            () -> queuedSetpoint.getArmAngle())
-                        .until(
-                            () ->
-                                ReefAlign.isWithinReefRange(
-                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold)
-                                    && coralSuperstructure.atTargetState(
-                                        CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                                        queuedSetpoint.getArmAngle()))
-                        .andThen(
+                    CommandUtils.dynamicEither(
                             coralSuperstructure
-                                .goToSetpointProfiled(
+                                .goToSetpointPID(() -> CoralScorerSetpoint.NEUTRAL)
+                                .until(
                                     () ->
-                                        Meters.of(
-                                            Math.min(
-                                                queuedSetpoint.getElevatorHeight().in(Meters),
-                                                CoralScorerSetpoint.PREALIGN
-                                                    .getElevatorHeight()
-                                                    .in(Meters))),
+                                        ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                            && (coralSuperstructure.atTargetState(
+                                                CoralScorerSetpoint.NEUTRAL))),
+                            coralSuperstructure
+                                .goToSetpointPID(
+                                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                                     () -> queuedSetpoint.getArmAngle())
-                                .until(drivetrain::atFinalPoseSetpoint)
+                                .until(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                            && (coralSuperstructure.atTargetState(
+                                                CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                                queuedSetpoint.getArmAngle()))),
+                            autoDealgaefy)
+                        .andThen(
+                            Commands.either(
+                                    Commands.waitUntil(() -> drivetrain.atPoseSetpoint())
+                                        .andThen(
+                                            coralSuperstructure
+                                                .goToSetpointProfiled(
+                                                    () -> CoralScorerSetpoint.KNOCK_ALGAE)
+                                                .until(
+                                                    () ->
+                                                        coralSuperstructure.atTargetState(
+                                                            CoralScorerSetpoint.KNOCK_ALGAE))
+                                                .andThen(
+                                                    coralSuperstructure
+                                                        .goToSetpointProfiled(
+                                                            () ->
+                                                                CoralScorerSetpoint.KNOCK_ALGAE
+                                                                    .getElevatorHeight(),
+                                                            () -> queuedSetpoint.getArmAngle())
+                                                        .until(
+                                                            () ->
+                                                                coralSuperstructure.atTargetState(
+                                                                    CoralScorerSetpoint.KNOCK_ALGAE
+                                                                        .getElevatorHeight(),
+                                                                    queuedSetpoint
+                                                                        .getArmAngle())))),
+                                    coralSuperstructure
+                                        .goToSetpointProfiled(
+                                            () ->
+                                                Meters.of(
+                                                    Math.min(
+                                                        queuedSetpoint
+                                                            .getElevatorHeight()
+                                                            .in(Meters),
+                                                        CoralScorerSetpoint.PREALIGN
+                                                            .getElevatorHeight()
+                                                            .in(Meters))),
+                                            () -> queuedSetpoint.getArmAngle())
+                                        .until(drivetrain::atFinalPoseSetpoint),
+                                    autoDealgaefy)
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(
@@ -684,6 +739,13 @@ public class RobotContainer {
                 () -> {
                   queuedReefPosition = ReefPosition.ALGAE;
                   queuedSetpoint = CoralScorerSetpoint.ALGAE_HIGH;
+                }));
+
+    new Trigger(() -> manipulator.getPOV() == 0)
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  isDealgaefying = !isDealgaefying;
                 }));
   }
 
