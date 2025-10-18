@@ -81,7 +81,17 @@ public class Elevator extends SubsystemBase {
           goToHeight(Meters.of(setpoint));
         });
   }
-
+  public Command goToHeightCommand(Supplier<Distance> targetHeight) {
+    return run(
+        () -> {
+          double setpoint =
+              MathUtil.clamp(
+                  targetHeight.get().in(Meters),
+                  ElevatorConstants.kElevatorMinimumHeight.in(Meters),
+                  ElevatorConstants.kElevatorMaximumHeight.in(Meters));
+          goToHeight(Meters.of(setpoint));
+        });
+  }
   // Command to "home" the encoder (go to starting position & set encoder to said position)
   // Sets voltage to a constant negative voltage
   // Once current spikes (signaling motor running into resistance) & the V ~0, encoder speed is

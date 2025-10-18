@@ -69,7 +69,12 @@ public class CoralEndEffector extends SubsystemBase {
           runAtVelocity(velocity.get());
         });
   }
-
+  public Command runAtVelocityCommand(Supplier<AngularVelocity> velocity) {
+    return run(
+        () -> {
+          runAtVelocity(velocity.get());
+        });
+  }
   // shortcut to intake coral
   public Command intakeCoral() {
     return Commands.runOnce(() -> Leds.getInstance().isIntaking = true)

@@ -1,8 +1,11 @@
 /* (C) Robolancers 2025 */
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -209,22 +212,22 @@ public class RobotContainer {
 
     configureLeds();
     configManipTriggers();
-    configureBindings();
-    // configureTuningBindings();
-  }
+ configureBindings();
+//configureTuningBindings();
+//   }
 
-  private double volts = 0;
+//   private double volts = 0;
 
-  private void configureTuningBindings() {
+//   private void configureTuningBindings() {
 
-    driver.a().onTrue(climber.lockClimb());
-    driver.y().onTrue(climber.unlockClimb());
-    // driver.a().whileTrue(elevatorArm.tune());
-    // driver.y().whileTrue(coralEndEffector.tune());
-    // driver.a().whileTrue(coralSuperstructure.tune());
-    // driver.b().whileTrue(coralSuperstructure.feedCoral());
-    // driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
-    // driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral(() -> queuedSetpoint));
+    //driver.a().onTrue(climber.lockClimb());
+    //driver.y().onTrue(climber.unlockClimb());
+//     driver.a().whileTrue(elevatorArm.tune());
+//     driver.x().whileTrue(coralEndEffector.tune());
+//     driver.y().whileTrue(coralSuperstructure.tune());
+//     driver.b().whileTrue(coralSuperstructure.feedCoral());
+//   driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
+//  driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral(() -> queuedSetpoint));
 
     // driver.a().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-2000)));
     // driver.b().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-3000)));
@@ -344,15 +347,15 @@ public class RobotContainer {
                         .goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)
                         .beforeStarting(() -> isClimbing = true)
                         .finallyDo(() -> isClimbing = false)));
-    driver
-        .a()
-        .onTrue(
-            climber
-                .climb()
-                .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
+    // driver
+    //     .a()
+    //     .onTrue(
+    //         climber
+    //             .climb()
+    //             .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
 
     driver.b().onTrue(elevatorArm.seedEncoder());
-
+driver.x().onTrue(elevatorArm.goToAnglePID(()->Degrees.of(-75)).alongWith(elevator.goToHeight(()->Meters.of(0.985))));
     // driver.a().whileTrue(elevator.setVoltage(() -> Volts.of(2)));
     // driver.b().whileTrue(elevator.setVoltage(() -> Volts.of(-2)));
 
@@ -362,27 +365,43 @@ public class RobotContainer {
     // RIGHT TRIGGER RELEASE + CORAL MODE = OUTTAKE CORAL
 
     // RIGHT BUMPER + CORAL MODE = INTAKE CORAL
-    driver
-        .rightBumper()
-        // .and(isHighCoralSetpoint.or(isL1Setpoint))
-        .whileTrue(
-            StationAlign.rotateToNearestStationTag(drivetrain, driverForward, driverStrafe)
-                .onlyWhile(() -> StationAlign.getStationDistance(drivetrain) < 2)
-                .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
-                .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
-                .repeatedly()
-                .alongWith(
-                    coralSuperstructure
-                        .feedCoral()
-                        .asProxy()
-                        .until(() -> coralEndEffector.hasCoral())
-                    // .andThen(
-                    //     ControllerCommands.rumbleController(
-                    //         driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75)
-                    //         )
-                    ));
-
+    // driver
+    //     .rightBumper()
+    //     // .and(isHighCoralSetpoint.or(isL1Setpoint))
+    //     .whileTrue(
+    //         StationAlign.rotateToNearestStationTag(drivetrain, driverForward, driverStrafe)
+    //             .onlyWhile(() -> StationAlign.getStationDistance(drivetrain) < 2)
+    //             .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
+    //             .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
+    //             .repeatedly()
+    //             .alongWith(
+    //                 coralSuperstructure
+    //                     .feedCoral()
+    //                     .asProxy()
+    //                     .until(() -> coralEndEffector.hasCoral())
+    //                 // .andThen(
+    //                 //     ControllerCommands.rumbleController(
+    //                 //         driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75)
+    //                 //         )
+    //                 ));
+driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
     // RIGHT TRIGGER + CORAL MODE = AUTO ALIGN TO CORAL
+    driver.a().whileTrue(elevatorArm.goToAnglePID(()->Degrees.of(-75)).alongWith(elevator.goToHeightCommand(()->Meters.of(0.985))).alongWith(coralEndEffector.intakeCoral()));
+    driver.a().onFalse(elevator.goToHeightCommand(()->Meters.of(1.135)).andThen(elevatorArm.goToAnglePID(()->Degrees.of(-64.53))).andThen(elevator.goToHeight(()->Inches.of(35))));
+//    driver.a().whileTrue((elevatorArm.goToAnglePID(()->Degrees.of(-75)).alongWith(elevator.goToHeight(()->Meters.of(0.985)))).alongWith(coralEndEffector.intakeCoral()));
+//    driver.a().onFalse(((elevatorArm.goToAnglePID(()->Degrees.of(-75))
+//    .alongWith(elevator.goToHeightCommand(()->Meters.of(0.985)))
+//    .alongWith(coralEndEffector.intakeCoral())).until(()->coralEndEffector.hasCoral())
+//    .andThen(elevator.goToHeightCommand(()->Meters.of(1.135)))
+//    .andThen(elevatorArm.goToAnglePID(()->Degrees.of(-64.53)))
+//    .andThen(elevator.goToHeightCommand(()->Inches.of(35)))));
+    driver.rightBumper()
+        .whileTrue((elevatorArm.goToAnglePID(()->Degrees.of(-75))
+        .alongWith(elevator.goToHeightCommand(()->Meters.of(0.985)))
+        .alongWith(coralEndEffector.intakeCoral())).until(()->coralEndEffector.hasCoral())
+        .andThen(elevator.goToHeightCommand(()->Meters.of(1.135)))
+        .andThen(elevatorArm.goToAnglePID(()->Degrees.of(-64.53)))
+        .andThen(elevator.goToHeightCommand(()->Inches.of(35))));
     driver
         .rightTrigger()
         .and(isHighCoralSetpoint)

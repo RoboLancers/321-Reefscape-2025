@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 public class ElevatorArmConstants {
   // the CAN ID of the arm motor on the elevator
-  public static final int kElevatorArmId = 15;
+  public static final int kElevatorArmId = 6;
 
   public static final int kEncoderCANdiId = 0;
 
@@ -31,7 +31,7 @@ public class ElevatorArmConstants {
   public static final int kAbsoluteEncoderPort = 0;
 
   // absolute encoder offset
-  public static final Angle kAbsoluteEncoderOffset = Degrees.of(0);
+  public static final Angle kAbsoluteEncoderOffset = Degrees.of(180);
 
   // controller config
   public static final Angle kAngleTolerance = Degrees.of(1);
