@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 public class ElevatorArmConstants {
   // the CAN ID of the arm motor on the elevator
-  public static final int kElevatorArmId = 15;
+  public static final int kElevatorArmId = 6; //TODO: almost certain this got changed to 6, check in revclient
 
   public static final int kEncoderCANdiId = 0;
 
@@ -55,6 +55,8 @@ public class ElevatorArmConstants {
   public static final Angle kCMOffset = Degrees.of(-19.6848);
   // the starting angle of the arm
   public static final Angle kStartAngle = Degrees.of(-64.53);
+// angle for arm intake with bigger arm
+  public static final Angle kArmIntakeAngle = Degrees.of(-75);
 
   public static final Constraints kArmConstraints =
       RobotBase.isReal()

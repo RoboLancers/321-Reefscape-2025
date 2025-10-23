@@ -1,6 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -9,6 +10,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -37,6 +39,7 @@ import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
+import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.leds.LedsConstants;
 import frc.robot.subsystems.vision.Vision;
@@ -362,25 +365,65 @@ public class RobotContainer {
     // RIGHT TRIGGER RELEASE + CORAL MODE = OUTTAKE CORAL
 
     // RIGHT BUMPER + CORAL MODE = INTAKE CORAL
-    driver
-        .rightBumper()
-        // .and(isHighCoralSetpoint.or(isL1Setpoint))
-        .whileTrue(
-            StationAlign.rotateToNearestStationTag(drivetrain, driverForward, driverStrafe)
-                .onlyWhile(() -> StationAlign.getStationDistance(drivetrain) < 2)
-                .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
-                .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
-                .repeatedly()
-                .alongWith(
-                    coralSuperstructure
-                        .feedCoral()
-                        .asProxy()
-                        .until(() -> coralEndEffector.hasCoral())
-                    // .andThen(
-                    //     ControllerCommands.rumbleController(
-                    //         driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75)
-                    //         )
-                    ));
+    // driver
+    //     .rightBumper()
+    //     // .and(isHighCoralSetpoint.or(isL1Setpoint))
+    //     .whileTrue(
+    //         StationAlign.rotateToNearestStationTag(drivetrain, driverForward, driverStrafe)
+    //             .onlyWhile(() -> StationAlign.getStationDistance(drivetrain) < 2)
+    //             .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
+    //             .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
+    //             .repeatedly()
+    //             .alongWith(
+    //                 coralSuperstructure
+    //                     .feedCoral()
+    //                     .asProxy()
+    //                     .until(() -> coralEndEffector.hasCoral())
+    //                 // .andThen(
+    //                 //     ControllerCommands.rumbleController(
+    //                 //         driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75)
+    //                 //         )
+    //                 ));
+
+    //the old intake command has the coral superstructure go to a certain position to intake coral, 
+    //then go back to the default position by returning the way it came
+    //this does not work with the new intake command because the arm is bigger, so when you go the
+    //intake position and intake coral, the physical entity consisting of the end effector and the coral
+    //is too large and gets stuck on the coral, which makes it impossible for the arm to simply rotate
+    //back to its original position.
+    //our solution is to intake coral, then raise the elevator, giving the arm space to rotate backward,
+    //then rotate the arm back, then lower the elevator (which will ultimately result in the coral
+    //superstructure returning to its inital position)
+
+    //this is one command that does all actions associated with intake while right bumper is true,
+    //then once it becomes false, coral superstructure will follow the aforementioned sequence of
+    //actions to return to it's initial state (the given values are the specific positions of
+    //different mechanisms in each state, eg 1.135 meters is the height that we raise the elevator
+    // to so that the arm has room to rotate back to default angle)
+
+    driver.rightBumper().whileTrue(elevatorArm.goToAnglePID(()->ElevatorArmConstants.kArmIntakeAngle).alongWith(elevator.goToHeightCommand(()->ElevatorConstants.kIntakeHeight)).alongWith(coralEndEffector.intakeCoral()));
+    driver.rightBumper().onFalse((
+        elevator.goToHeight(()->ElevatorConstants.kPostIntakeHeight)
+        .alongWith(
+        elevatorArm.goToAnglePID(()->ElevatorArmConstants.kArmIntakeAngle)))
+            .until(
+            ()->elevator.atHeight(ElevatorConstants.kPostIntakeHeight))
+                .andThen((
+                    elevator.goToHeight(()->ElevatorConstants.kPostIntakeHeight)
+                    .alongWith(
+                    elevatorArm.goToAnglePID(()->CoralScorerSetpoint.NEUTRAL.getArmAngle())))
+                        .until(
+                            ()->elevatorArm.atAngle(CoralScorerSetpoint.NEUTRAL.getArmAngle())))
+                                .andThen((
+                                elevator.goToHeightCommand(()->CoralScorerSetpoint.NEUTRAL.getElevatorHeight())
+                                .alongWith(
+                                    elevatorArm.goToAnglePID(()->CoralScorerSetpoint.NEUTRAL.getArmAngle())))
+                                        .until(()->elevator.atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight())))
+    );
+//TODO: Make sure neutral setpoint angle works with new intake routine. it is the default angle, but we
+//TODO: have been using -64.53, which is listed as arm starting angle in arm constants (just manually
+//TODO: move the arm to test if it hits the funnel)
+
 
     // RIGHT TRIGGER + CORAL MODE = AUTO ALIGN TO CORAL
     driver
