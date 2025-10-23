@@ -55,6 +55,8 @@ public class ElevatorArmConstants {
   public static final Angle kCMOffset = Degrees.of(-19.6848);
   // the starting angle of the arm
   public static final Angle kStartAngle = Degrees.of(-64.53);
+// angle for arm intake with bigger arm
+  public static final Angle kArmIntakeAngle = Degrees.of(-75);
 
   public static final Constraints kArmConstraints =
       RobotBase.isReal()

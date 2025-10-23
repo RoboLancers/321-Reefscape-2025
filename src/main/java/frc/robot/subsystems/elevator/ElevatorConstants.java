@@ -58,4 +58,8 @@ public class ElevatorConstants {
   public static final LinearVelocity kHomingVelocityThreshold = MetersPerSecond.of(0.5);
 
   public static final Voltage kNominalVoltage = Volts.of(12);
+//height for intake with bigger arm
+  public static final Distance kIntakeHeight = Meters.of(0.985);
+  //height that we raise the elevator w the larger arm to so that the arm has room to rotate
+  public static final Distance kPostIntakeHeight = Meters.of(1.135);
 }

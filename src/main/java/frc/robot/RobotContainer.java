@@ -39,6 +39,7 @@ import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
+import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.leds.LedsConstants;
 import frc.robot.subsystems.vision.Vision;
@@ -400,15 +401,15 @@ public class RobotContainer {
     //different mechanisms in each state, eg 1.135 meters is the height that we raise the elevator
     // to so that the arm has room to rotate back to default angle)
 
-    driver.rightBumper().whileTrue(elevatorArm.goToAnglePID(()->Degrees.of(-75)).alongWith(elevator.goToHeight(()->Meters.of(0.985))).alongWith(coralEndEffector.intakeCoral()));
+    driver.rightBumper().whileTrue(elevatorArm.goToAnglePID(()->ElevatorArmConstants.kArmIntakeAngle).alongWith(elevator.goToHeightCommand(()->ElevatorConstants.kIntakeHeight)).alongWith(coralEndEffector.intakeCoral()));
     driver.rightBumper().onFalse((
-        elevator.goToHeight(()->Meters.of(1.135))
+        elevator.goToHeight(()->ElevatorConstants.kPostIntakeHeight)
         .alongWith(
-        elevatorArm.goToAnglePID(()->Degrees.of(-75))))
+        elevatorArm.goToAnglePID(()->ElevatorArmConstants.kArmIntakeAngle)))
             .until(
-            ()->elevator.atHeight(Meters.of(1.135)))
+            ()->elevator.atHeight(ElevatorConstants.kPostIntakeHeight))
                 .andThen((
-                    elevator.goToHeight(()->Meters.of(1.135))
+                    elevator.goToHeight(()->ElevatorConstants.kPostIntakeHeight)
                     .alongWith(
                     elevatorArm.goToAnglePID(()->CoralScorerSetpoint.NEUTRAL.getArmAngle())))
                         .until(
