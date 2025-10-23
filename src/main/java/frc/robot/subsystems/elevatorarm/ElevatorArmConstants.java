@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 public class ElevatorArmConstants {
   // the CAN ID of the arm motor on the elevator
-  public static final int kElevatorArmId = 15;
+  public static final int kElevatorArmId = 6; //TODO: almost certain this got changed to 6, check in revclient
 
   public static final int kEncoderCANdiId = 0;
 
