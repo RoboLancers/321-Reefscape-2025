@@ -1,6 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -334,16 +335,16 @@ public class RobotContainer {
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
-    driver
-        .y()
-        .toggleOnTrue(
-            climber
-                .goToAngle(() -> ClimberConstants.kClimbPrepAngle)
-                .alongWith(
-                    coralSuperstructure
-                        .goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)
-                        .beforeStarting(() -> isClimbing = true)
-                        .finallyDo(() -> isClimbing = false)));
+    // driver
+    //     .y()
+    //     .toggleOnTrue(
+    //         climber
+    //             .goToAngle(() -> ClimberConstants.kClimbPrepAngle)
+    //             .alongWith(
+    //                 coralSuperstructure
+    //                     .goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)
+    //                     .beforeStarting(() -> isClimbing = true)
+    //                     .finallyDo(() -> isClimbing = false)));
     driver
         .a()
         .onTrue(
@@ -362,6 +363,9 @@ public class RobotContainer {
     // RIGHT TRIGGER RELEASE + CORAL MODE = OUTTAKE CORAL
 
     // RIGHT BUMPER + CORAL MODE = INTAKE CORAL
+driver.y().whileTrue((elevatorArm.goToAnglePID(()->Degrees.of(-75))).alongWith(elevator.goToHeight(()->Meters.of(0.985))).alongWith(coralEndEffector.intakeCoral()));
+driver.y().onFalse((elevator.goToHeight(()->Meters.of(1.135))).andThen(elevatorArm.goToAnglePID(()->Degrees.of(-64.53))).andThen(elevator.goToHeight(()->CoralScorerSetpoint.NEUTRAL.getElevatorHeight())));
+
     driver
         .rightBumper()
         // .and(isHighCoralSetpoint.or(isL1Setpoint))
@@ -383,6 +387,7 @@ public class RobotContainer {
                     ));
 
     // RIGHT TRIGGER + CORAL MODE = AUTO ALIGN TO CORAL
+
     driver
         .rightTrigger()
         .and(isHighCoralSetpoint)

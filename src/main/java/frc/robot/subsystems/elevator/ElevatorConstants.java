@@ -58,4 +58,12 @@ public class ElevatorConstants {
   public static final LinearVelocity kHomingVelocityThreshold = MetersPerSecond.of(0.5);
 
   public static final Voltage kNominalVoltage = Volts.of(12);
+  
+  public static final int kP = 50;
+  public static final int kI = 0;
+  public static final int kD = 0;
+  public static final double kS = 0;
+  public static final double kG = 0;
+  public static final double kV = 0.25;
+  public static final double kA = 0.01;
 }

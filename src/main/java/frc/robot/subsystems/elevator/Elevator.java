@@ -2,12 +2,20 @@
 package frc.robot.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.Amp;
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volt;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,46 +23,121 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+
 @Logged
 public class Elevator extends SubsystemBase {
   // Initialize all parts of Elevator Subsystem, as well as pid controller
-  private ElevatorIO io;
-  private ElevatorInputs inputs;
-
+ 
   private Distance targetHeight = ElevatorConstants.kElevatorStartingHeight;
 
   private boolean isHomed = false;
 
+  private Distance lastTargetHeight = ElevatorConstants.kElevatorStartingHeight;
+
+// Creates motor objects
+
+  public TalonFX elevatorMotorLeft = new TalonFX(ElevatorConstants.kLeftMotorID);
+
+  // NOTE: Right motor MAY be commented out in order to test one motor
+
+  public TalonFX elevatorMotorRight = new TalonFX(ElevatorConstants.kRightMotorID);
+
   // Method that creates the Elevator object as the real/sim io by checking if we're running a sim
   // or not
   public static Elevator create() {
-    return RobotBase.isReal()
-        ? new Elevator(new ElevatorIOTalon())
-        : new Elevator(new ElevatorIOSim());
-  }
-
-  public static Elevator disable() {
-    return new Elevator(new ElevatorIOIdeal());
+    return new Elevator();
   }
 
   // Eleavtor Constructor
   // Creates Elevator, sets initialized variables to the real/sim values from create() method above
-  public Elevator(ElevatorIO io) {
-    this.io = io;
-    this.inputs = new ElevatorInputs();
-
+  public Elevator() {
+    setupMotors();
+    setOnboardPID(50, 0, 0, 0, 0, 0.25, 0.01);
     // set position to starting position
-    io.resetEncoderPosition();
+    resetEncoderPosition();
   }
 
   // Below are methods & their commands for simple robot operations
   // Because we need commands for when buttons are pressed, we create methods first then use
   // run(()->{method})
 
-  // Sets voltage
-  public void setVoltage(Voltage volts) {
-    io.setVoltage(volts);
+private void setupMotors() {
+    TalonFXConfiguration configurationLeft =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(ElevatorConstants.kStatorLimit)
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(ElevatorConstants.kSupplyLimit)
+                    .withSupplyCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        ElevatorConstants.kLeftInverted
+                            ? InvertedValue.Clockwise_Positive
+                            : InvertedValue.CounterClockwise_Positive)
+                    .withNeutralMode(NeutralModeValue.Brake))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(ElevatorConstants.kElevatorGearing)
+                    .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor));
+
+    TalonFXConfiguration configurationRight =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(ElevatorConstants.kStatorLimit)
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(ElevatorConstants.kStatorLimit)
+                    .withSupplyCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(
+                        ElevatorConstants.kRightInverted
+                            ? InvertedValue.Clockwise_Positive
+                            : InvertedValue.CounterClockwise_Positive)
+                    .withNeutralMode(NeutralModeValue.Brake))
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withSensorToMechanismRatio(ElevatorConstants.kElevatorGearing)
+                    .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicCruiseVelocity(
+                        convertMetersToRot(ElevatorConstants.kMaxVelocity.in(MetersPerSecond)))
+                    .withMotionMagicAcceleration(
+                        convertMetersToRot(
+                            ElevatorConstants.kMaxAcceleration.in(MetersPerSecondPerSecond))))
+            .withSlot0(
+                new Slot0Configs()
+                    .withGravityType(GravityTypeValue.Elevator_Static)
+                    .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
+
+    elevatorMotorLeft.getConfigurator().apply(configurationLeft);
+    elevatorMotorRight.getConfigurator().apply(configurationRight);
   }
+
+  //Sets voltage
+public void setVoltage(Voltage Volts) {
+    elevatorMotorRight.setVoltage(Volts.in(Volt));
+    elevatorMotorLeft.setControl(
+        new Follower(elevatorMotorRight.getDeviceID(), ElevatorConstants.kFollowerInverted));
+  }
+
 
   public Command setVoltage(Supplier<Voltage> volts) {
     return run(
@@ -63,10 +146,17 @@ public class Elevator extends SubsystemBase {
         });
   }
 
+public void goToPosition(Distance position) {
+    lastTargetHeight = position;
+    elevatorMotorRight.setControl(new MotionMagicVoltage(convertMetersToRot(position.in(Meters))));
+    elevatorMotorLeft.setControl(
+        new Follower(elevatorMotorRight.getDeviceID(), ElevatorConstants.kFollowerInverted));
+  }
+
   // Goes to height
   public void goToHeight(Distance targetHeight) {
     this.targetHeight = targetHeight;
-    io.goToPosition(targetHeight);
+    goToPosition(targetHeight);
   }
 
   // returns a Command to go to height
@@ -82,6 +172,13 @@ public class Elevator extends SubsystemBase {
         });
   }
 
+  public void resetEncoderPosition() {
+    elevatorMotorLeft.setPosition(
+        convertMetersToRot(ElevatorConstants.kElevatorStartingHeight.in(Meters)));
+    elevatorMotorRight.setPosition(
+        convertMetersToRot(ElevatorConstants.kElevatorStartingHeight.in(Meters)));
+  }
+
   // Command to "home" the encoder (go to starting position & set encoder to said position)
   // Sets voltage to a constant negative voltage
   // Once current spikes (signaling motor running into resistance) & the V ~0, encoder speed is
@@ -91,17 +188,37 @@ public class Elevator extends SubsystemBase {
     return setVoltage(() -> ElevatorConstants.kHomingVoltage)
         .until(
             () ->
-                (inputs.current.in(Amp) > ElevatorConstants.kHomingCurrentThreshold.in(Amp)
-                    && Math.abs(inputs.velocity.in(MetersPerSecond))
+                (getCurrent().in(Amp) > ElevatorConstants.kHomingCurrentThreshold.in(Amp)
+                    && Math.abs(getVelocity().in(MetersPerSecond))
                         < ElevatorConstants.kHomingVelocityThreshold.in(MetersPerSecond)))
         .andThen(
             runOnce(
                 () -> {
-                  io.resetEncoderPosition();
+                  resetEncoderPosition();
                   isHomed = true;
                 }));
   }
 
+  public void setOnboardPID(double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
+    elevatorMotorRight
+        .getConfigurator()
+        .apply(
+            new Slot0Configs()
+                .withGravityType(GravityTypeValue.Elevator_Static)
+                .withKP(kP)
+                .withKI(kI)
+                .withKD(kD)
+                .withKS(kS)
+                .withKG(kG)
+                .withKV(kV)
+                .withKA(kA)
+                .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign));
+  }
+
+
+  public double convertMetersToRot(double meters) {
+    return meters / ElevatorConstants.kElevatorConversion.in(Meters);
+  }
   // When command is run, tunable constants are created & PID controller values & target height are
   // set to said tunable values
   public Command tune() {
@@ -116,9 +233,7 @@ public class Elevator extends SubsystemBase {
 
     return runOnce(
             () -> {
-              io.setOnboardPID(
-                  new ElevatorConfig(
-                      kP.get(), kI.get(), kD.get(), kG.get(), kS.get(), kV.get(), kA.get()));
+              setOnboardPID(kP.get(), kI.get(), kD.get(), kG.get(), kS.get(), kV.get(), kA.get());
             })
         .andThen(
             run(
@@ -127,14 +242,13 @@ public class Elevator extends SubsystemBase {
                 }));
   }
 
-  // Loops repeatedly
-  public void periodic() {
-    // Constantly updates inputs
-    io.updateInputs(inputs);
-  }
-
   public Distance getHeight() {
-    return inputs.height;
+    Distance height =
+    Meters.of(
+        elevatorMotorRight.getPosition().getValueAsDouble()
+            * ElevatorConstants.kElevatorConversion.in(Meters));
+    return height;
+    
   }
 
   public boolean elevatorIsHomed() {
@@ -147,15 +261,31 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean atSetpoint() {
-    return inputs.atSetpoint;
+    boolean atSetpoint =
+        Math.abs(getHeight().in(Meters) - lastTargetHeight.in(Meters))
+            < ElevatorConstants.kHeightTolerance.in(Meters);
+    return atSetpoint;
   }
 
   public Distance getTargetHeight() {
     return targetHeight;
   }
 
+  public Current getCurrent(){
+    Current current = Amps.of(elevatorMotorRight.getStatorCurrent().getValueAsDouble());
+    return current;
+  }
+
+  public LinearVelocity getVelocity(){
+    LinearVelocity velocity =
+        MetersPerSecond.of(
+            elevatorMotorRight.getVelocity().getValueAsDouble()
+                * ElevatorConstants.kElevatorConversion.in(Meters));
+    return velocity;
+  }
+
   public boolean atHeight(Distance height) {
-    return Math.abs(inputs.height.in(Meters) - height.in(Meters))
+    return Math.abs(getHeight().in(Meters) - height.in(Meters))
         < ElevatorConstants.kHeightTolerance.in(Meters);
   }
 }

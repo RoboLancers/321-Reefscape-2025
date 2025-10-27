@@ -152,6 +152,7 @@ public class CoralSuperstructure {
     NEUTRAL(
         ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
     FEED_CORAL(Meters.of(0.885), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM),
+
     L1(Meters.of(0.95), Degrees.of(-87), CoralEndEffectorConstants.kL1OuttakeRPM),
     L2(Meters.of(0.96), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM),
     L3(
