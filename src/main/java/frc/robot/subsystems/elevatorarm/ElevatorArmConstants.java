@@ -56,6 +56,7 @@ public class ElevatorArmConstants {
   // the starting angle of the arm
   public static final Angle kStartAngle = Degrees.of(-64.53);
 
+  public static final double kCoralFF = 0;
 
   public static final Constraints kArmConstraints =
       RobotBase.isReal()

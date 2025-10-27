@@ -1,7 +1,9 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.elevatorarm;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -14,6 +16,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +28,15 @@ import frc.robot.util.TunableConstant;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.AnalogSensorConfig;
+import com.revrobotics.spark.config.EncoderConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 // NOTE: Convention is: zeroed when coral intake CG is 90 degrees
 // TO ZERO: move coral intake such that CG is all the way down due to gravity, zero, then move it to
 // 90 deg, then
@@ -32,20 +45,17 @@ import java.util.function.Supplier;
 // Elevator Arm subsystem - represents the arm/pivot on the elevator
 @Logged
 public class ElevatorArm extends SubsystemBase {
-  // hardware abstraction for the arm
-  private ElevatorArmIO io;
-  private ElevatorArmInputs inputs;
-
+  
   // controllers classes for controlling the arm
-  private PIDController pidController;
-  private ArmFeedforward feedforward;
+  private PIDController pidController = new PIDController(0.25, 0, 0.002);
+  private ArmFeedforward feedforward = new ArmFeedforward(0, 0.330, 0,0);
   private TrapezoidProfile profile;
   private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
   private double goalAngle;
   private boolean hasSeeded = false;
 
-  // config for the arm
-  private ElevatorArmConfig config;
+  private SparkMax armMotor =
+     new SparkMax(ElevatorArmConstants.kElevatorArmId, MotorType.kBrushless);
 
   // suppliers for game piece detection for variable feedforward for game pieces
   @NotLogged private BooleanSupplier hasCoral = () -> false;
@@ -55,31 +65,30 @@ public class ElevatorArm extends SubsystemBase {
    * environment
    */
   public static ElevatorArm create() {
-    return RobotBase.isReal()
-        ? new ElevatorArm(new ElevatorArmIOSpark(), ElevatorArmIOSpark.config)
-        : new ElevatorArm(new ElevatorArmIOSim(), ElevatorArmIOSim.config);
+   return new ElevatorArm();
   }
 
-  /** Creates an ElevatorArm that does not control any hardware / simulation (to disable the arm) */
-  public static ElevatorArm disable() {
-    return new ElevatorArm(new ElevatorArmIOIdeal(), ElevatorArmIOIdeal.config);
-  }
-
-  /**
-   * Instantiates an ElevatorArm
-   *
-   * @param io the hardware abstraction interface that the ElevatorArm is controlling
-   * @param config the tuning config for the ElevatorArm
-   */
-  public ElevatorArm(ElevatorArmIO io, ElevatorArmConfig config) {
-    this.io = io;
-    this.config = config;
-    this.inputs = new ElevatorArmInputs();
-    this.pidController = new PIDController(config.kP(), config.kI(), config.kD());
-    this.feedforward = new ArmFeedforward(0, config.kG(), 0);
-
+  public ElevatorArm() {
     this.pidController.setTolerance(ElevatorArmConstants.kAngleTolerance.in(Degrees));
     this.profile = new TrapezoidProfile(ElevatorArmConstants.kArmConstraints);
+    configureMotors();
+    seedEncoderValues();
+  }
+
+  public void configureMotors(){
+    armMotor.configure(
+        new SparkMaxConfig() // config for basic motor stuff
+            .smartCurrentLimit(ElevatorArmConstants.kCurrentLimit)
+            .voltageCompensation(ElevatorArmConstants.kNominalVoltage)
+            .idleMode(IdleMode.kBrake)
+            .inverted(ElevatorArmConstants.kInverted)
+            .apply(
+                new EncoderConfig() // config for relative encoder
+                    .positionConversionFactor(ElevatorArmConstants.kPositionConversionFactor)
+                    .velocityConversionFactor(ElevatorArmConstants.kVelocityConversionFactor))
+            .apply(new AnalogSensorConfig().positionConversionFactor(360 / 3.3)),
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
   }
 
   /**
@@ -91,10 +100,11 @@ public class ElevatorArm extends SubsystemBase {
     // calculate the amount of feedforward needed to keep a coral
     double output = 0;
     if (hasCoral.getAsBoolean()) {
-      output += config.kCoralFF() * Math.cos(targetAngle.in(Radians));
+      output += ElevatorArmConstants.kCoralFF * Math.cos(targetAngle.in(Radians));
     }
     return output;
   }
+
 
   /**
    * Commands the arm to go to a desired angle This needs to be run continuously (see {@link
@@ -110,13 +120,13 @@ public class ElevatorArm extends SubsystemBase {
             new TrapezoidProfile.State(angle.in(Degrees), 0));
 
     double volts =
-        pidController.calculate(inputs.angle.in(Degrees), setpointState.position)
+        pidController.calculate(getAngle().in(Degrees), setpointState.position)
             + feedforward.calculate(
                 Degrees.of(setpointState.position).plus(ElevatorArmConstants.kCMOffset).in(Radians),
                 0)
             + calculateGamepieceFeedforward(Degrees.of(setpointState.position));
 
-    io.setVoltage(Volts.of(volts));
+    runVolts(Volts.of(volts));
   }
 
   /**
@@ -126,7 +136,7 @@ public class ElevatorArm extends SubsystemBase {
    * @param volts the voltage to run the arm at
    */
   public void runVolts(Voltage volts) {
-    io.setVoltage(volts);
+    armMotor.setVoltage(volts);
   }
 
   /**
@@ -164,10 +174,14 @@ public class ElevatorArm extends SubsystemBase {
         });
   }
 
+  public void seedEncoderValues() {
+    armMotor.getEncoder().setPosition(armMotor.getAnalog().getPosition() - 180);
+  }
+
   public Command seedEncoder() {
     return Commands.runOnce(
         () -> {
-          io.seedEncoderValues();
+          seedEncoderValues();
           System.out.println("Seeded.");
           this.hasSeeded = true;
         });
@@ -185,10 +199,10 @@ public class ElevatorArm extends SubsystemBase {
    * @return the command used to tune
    */
   public Command tune() {
-    TunableConstant kP = new TunableConstant("/ElevatorArm/kP", config.kP());
-    TunableConstant kI = new TunableConstant("/ElevatorArm/kI", config.kI());
-    TunableConstant kD = new TunableConstant("/ElevatorArm/kD", config.kD());
-    TunableConstant kG = new TunableConstant("/ElevatorArm/kG", config.kG());
+    TunableConstant kP = new TunableConstant("/ElevatorArm/kP",0);
+    TunableConstant kI = new TunableConstant("/ElevatorArm/kI", 0);
+    TunableConstant kD = new TunableConstant("/ElevatorArm/kD", 0);
+    TunableConstant kG = new TunableConstant("/ElevatorArm/kG", 0);
     TunableConstant targetAngle = new TunableConstant("/ElevatorArm/TargetAngle", 0);
     TunableConstant maxVelocity = new TunableConstant("/ElevatorArm/MaxVelocity", 0);
     TunableConstant maxAcceleration = new TunableConstant("/ElevatorArm/MaxAcceleration", 0);
@@ -205,11 +219,7 @@ public class ElevatorArm extends SubsystemBase {
         });
   }
 
-  /** periodic method of the ElevatorArm Just updates the inputs from the sensors for now */
-  public void periodic() {
-    io.updateInputs(this.inputs);
-  }
-
+  
   public boolean atSetpoint() {
     return pidController.atSetpoint();
   }
@@ -220,7 +230,18 @@ public class ElevatorArm extends SubsystemBase {
   }
 
   public Angle getAngle() {
-    return inputs.angle;
+  Angle angle = Degrees.of(armMotor.getEncoder().getPosition()); 
+    return angle;
+  }
+
+  public AngularVelocity getVelocity(){
+   AngularVelocity velocity = DegreesPerSecond.of(armMotor.getEncoder().getVelocity());
+   return velocity;
+  }
+
+  public Current getCurrent(){
+    Current current = Amps.of(armMotor.getOutputCurrent());
+    return current;
   }
 
   public double getSetpoint() {
@@ -228,7 +249,7 @@ public class ElevatorArm extends SubsystemBase {
   }
 
   public boolean atAngle(Angle angle) {
-    return Math.abs(inputs.angle.in(Degrees) - angle.in(Degrees))
+    return Math.abs(getAngle().in(Degrees) - angle.in(Degrees))
         < ElevatorArmConstants.kAngleTolerance.in(Degrees);
   }
 }
