@@ -1,5 +1,5 @@
 /* (C) Robolancers 2025 */
-package frc.robot.subsystems.elevatorarm;
+package frc.robot.subsystems.arm;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
@@ -10,7 +10,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 
-public class ElevatorArmConstants {
+public class ArmConstants {
   // the CAN ID of the arm motor on the elevator
   public static final int kElevatorArmId = 15;
 

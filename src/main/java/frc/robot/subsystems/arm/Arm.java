@@ -1,5 +1,5 @@
 /* (C) Robolancers 2025 */
-package frc.robot.subsystems.elevatorarm;
+package frc.robot.subsystems.arm;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
@@ -37,14 +37,14 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 // Elevator Arm subsystem - represents the arm/pivot on the elevator
 @Logged
-public class ElevatorArm extends SubsystemBase {
+public class Arm extends SubsystemBase {
   
   // controllers classes for controlling the arm
   private PIDController pidController = new PIDController(0.25, 0, 0.002);
   private ArmFeedforward feedforward = new ArmFeedforward(0, 0.330, 0,0);
 
   private SparkMax armMotor =
-     new SparkMax(ElevatorArmConstants.kElevatorArmId, MotorType.kBrushless);
+     new SparkMax(ArmConstants.kElevatorArmId, MotorType.kBrushless);
 
   // suppliers for game piece detection for variable feedforward for game pieces
   @NotLogged private BooleanSupplier hasCoral = () -> false;
@@ -53,26 +53,26 @@ public class ElevatorArm extends SubsystemBase {
    * Creates an ElevatorArm instance controlling a real or simulated elevator arm based on the
    * environment
    */
-  public static ElevatorArm create() {
-   return new ElevatorArm();
+  public static Arm create() {
+   return new Arm();
   }
 
-  public ElevatorArm() {
-    this.pidController.setTolerance(ElevatorArmConstants.kAngleTolerance.in(Degrees));
+  public Arm() {
+    this.pidController.setTolerance(ArmConstants.kAngleTolerance.in(Degrees));
     configureMotors();
   }
 
   public void configureMotors(){
     armMotor.configure(
         new SparkMaxConfig() // config for basic motor stuff
-            .smartCurrentLimit(ElevatorArmConstants.kCurrentLimit)
-            .voltageCompensation(ElevatorArmConstants.kNominalVoltage)
+            .smartCurrentLimit(ArmConstants.kCurrentLimit)
+            .voltageCompensation(ArmConstants.kNominalVoltage)
             .idleMode(IdleMode.kBrake)
-            .inverted(ElevatorArmConstants.kInverted)
+            .inverted(ArmConstants.kInverted)
             .apply(
                 new EncoderConfig() // config for relative encoder
-                    .positionConversionFactor(ElevatorArmConstants.kPositionConversionFactor)
-                    .velocityConversionFactor(ElevatorArmConstants.kVelocityConversionFactor))
+                    .positionConversionFactor(ArmConstants.kPositionConversionFactor)
+                    .velocityConversionFactor(ArmConstants.kVelocityConversionFactor))
             .apply(new AnalogSensorConfig().positionConversionFactor(360 / 3.3)),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
@@ -91,7 +91,7 @@ public class ElevatorArm extends SubsystemBase {
     double volts =
         pidController.calculate(getAngle().in(Degrees), angle.in(Degrees))
             + feedforward.calculate(
-                angle.plus(ElevatorArmConstants.kCMOffset).in(Radians),
+                angle.plus(ArmConstants.kCMOffset).in(Radians),
                 0);
 
     runVolts(Volts.of(volts));
@@ -172,6 +172,6 @@ public class ElevatorArm extends SubsystemBase {
 
   public boolean atAngle(Angle angle) {
     return Math.abs(getAngle().in(Degrees) - angle.in(Degrees))
-        < ElevatorArmConstants.kAngleTolerance.in(Degrees);
+        < ArmConstants.kAngleTolerance.in(Degrees);
   }
 }

@@ -1,6 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.coralendeffector;
 
+import static edu.wpi.first.units.Units.Millimeter;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -9,57 +10,54 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.CoralSuperstructure.CoralScorerSetpoint;
-import frc.robot.subsystems.leds.Leds;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
+
+import com.playingwithfusion.TimeOfFlight;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 // coral end effector subsystem (now a coral / algae end effector mechanism)
 @Logged
 public class CoralEndEffector extends SubsystemBase {
-  private CoralEndEffectorInputs inputs;
-  private CoralEndEffectorIO io;
+  
+  private PIDController endEffectorController = new PIDController(0.00007, 0, 0);
+  private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0,0.0022,0);
 
-  private PIDController endEffectorController;
-  private SimpleMotorFeedforward feedforward;
+  private SparkMax motor = new SparkMax(CoralEndEffectorConstants.kMotorPort, MotorType.kBrushless);
+  
+  private void configureMotors(){
+  motor.configure(
+      new SparkMaxConfig()
+          .inverted(CoralEndEffectorConstants.kInvertedMotor)
+          .smartCurrentLimit(CoralEndEffectorConstants.kCurrentLimit),
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters);
+  }
 
-  private CoralEndEffectorConfig config;
+  // init distance sensor
+  private TimeOfFlight coralDistSensor = new TimeOfFlight(CoralEndEffectorConstants.kCoralSensorId);
 
   public static CoralEndEffector create() {
-    return RobotBase.isReal()
-        ? new CoralEndEffector(new CoralEndEffectorIOReal(), CoralEndEffectorIOReal.config)
-        : new CoralEndEffector(new CoralEndEffectorIOSim(), CoralEndEffectorIOSim.config);
+    return new CoralEndEffector();
   }
 
-  public static CoralEndEffector disable() {
-    return new CoralEndEffector(new CoralEndEffectorIOIdeal(), CoralEndEffectorIOIdeal.config);
-  }
-
-  public CoralEndEffector(CoralEndEffectorIO io, CoralEndEffectorConfig config) {
-    this.io = io;
-    this.inputs = new CoralEndEffectorInputs();
-    this.config = config;
-    this.endEffectorController = new PIDController(config.kP(), config.kI(), config.kD());
-    this.feedforward = new SimpleMotorFeedforward(0, config.kV());
-  }
-
-  // constantly updates inputs
-  @Override
-  public void periodic() {
-    io.updateInputs(inputs);
+  public CoralEndEffector() {
+    configureMotors();
   }
 
   // run the end effector at a certain specified velocity using PIDFF control
   // Will only run once; For a continuous method, see runAtVelocity(Supplier<AngularVelocity>)
   public void runAtVelocity(AngularVelocity velocity) {
     double output =
-        endEffectorController.calculate(inputs.velocity.in(RPM), velocity.in(RPM))
+        endEffectorController.calculate(getVelocity().in(RPM), velocity.in(RPM))
             + feedforward.calculate(velocity.in(RPM));
-    io.setVoltage(Volts.of(output));
+    motor.setVoltage(Volts.of(output));
   }
 
   // continuously run the end effector at a certain velocity supplied by the velocity supplier
@@ -70,26 +68,12 @@ public class CoralEndEffector extends SubsystemBase {
         });
   }
 
-  // shortcut to intake coral
-  public Command intakeCoral() {
-    return Commands.runOnce(() -> Leds.getInstance().isIntaking = true)
-        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kCoralIntakeRPM))
-        .finallyDo(() -> Leds.getInstance().isIntaking = false);
-  }
-
-  // shortcut to outtake coral
-  public Command outtakeCoral(Supplier<CoralScorerSetpoint> setpoint) {
-    return Commands.runOnce(() -> Leds.getInstance().isOuttaking = true)
-        .andThen(runAtVelocity(() -> setpoint.get().getOuttakeVelocity()))
-        .finallyDo(() -> Leds.getInstance().isOuttaking = false);
-  }
-
   public Command runVolts(Supplier<Voltage> voltage) {
-    return run(() -> io.setVoltage(voltage.get()));
+    return run(() -> motor.setVoltage(voltage.get()));
   }
 
   public boolean hasCoral() {
-    return inputs.hasCoral;
+   return coralDistSensor.getRange() < CoralEndEffectorConstants.kDetectionRange.in(Millimeter);
   }
 
   // stalls coral if we have a coral; this should be the default command
@@ -105,10 +89,10 @@ public class CoralEndEffector extends SubsystemBase {
 
   // tune PIDFF of end effector
   public Command tune() {
-    TunableConstant kP = new TunableConstant("/CoralEndEffector/kP", config.kP());
-    TunableConstant kI = new TunableConstant("/CoralEndEffector/kI", config.kI());
-    TunableConstant kD = new TunableConstant("/CoralEndEffector/kD", config.kD());
-    TunableConstant kV = new TunableConstant("/CoralEndEffector/kV", config.kV());
+    TunableConstant kP = new TunableConstant("/CoralEndEffector/kP", 0.0007);
+    TunableConstant kI = new TunableConstant("/CoralEndEffector/kI", 0);
+    TunableConstant kD = new TunableConstant("/CoralEndEffector/kD", 0);
+    TunableConstant kV = new TunableConstant("/CoralEndEffector/kV", 0.0022);
     TunableConstant targetRPM = new TunableConstant("/CoralEndEffector/TargetRPM", 0);
 
     return run(
@@ -118,4 +102,9 @@ public class CoralEndEffector extends SubsystemBase {
           runAtVelocity(RPM.of(targetRPM.get()));
         });
   }
+
+ private AngularVelocity getVelocity(){
+  return RPM.of(this.motor.getEncoder().getVelocity());
+ }
+
 }

@@ -9,17 +9,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.ProcessorAlign;
-import frc.robot.commands.ReefAlign;
-import frc.robot.commands.StationAlign;
+
 import frc.robot.util.VirtualSubsystem;
 
 @Logged
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  @Logged(name = "RobotContainer")
-  private final RobotContainer m_robotContainer;
+  
 
   // @Logged(name = "AssetsRobotPose")
   // public Pose2d robotPose = new Pose2d();
@@ -29,7 +26,7 @@ public class Robot extends TimedRobot {
   //     new Pose3d[] {new Pose3d(), new Pose3d(), new Pose3d(), new Pose3d()};
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+   
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
     CameraServer.startAutomaticCapture();
@@ -44,9 +41,7 @@ public class Robot extends TimedRobot {
     final var robotConstants = RobotConstants.class;
 
     // TODO: load robot alliance globally on DS connection to avoid extra lookups
-    ReefAlign.loadReefAlignmentPoses();
-    StationAlign.loadStationAlignmentPoses();
-    ProcessorAlign.loadProcessorAlignmentPoses();
+
   }
 
   @Override
@@ -71,7 +66,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
